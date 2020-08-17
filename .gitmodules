@@ -1,3 +1,9 @@
 [submodule "coordinator"]
 	path = coordinator
 	url = https://github.com/jayeeson/coordinatorService
+[submodule "load_balancer"]
+	path = load_balancer
+	url = https://github.com/jayeeson/loadBalancerService
+[submodule "url_shortener"]
+	path = url_shortener
+	url = https://github.com/jayeeson/urlShortenerService
