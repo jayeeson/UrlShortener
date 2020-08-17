@@ -1,0 +1,3 @@
+[submodule "coordinator"]
+	path = coordinator
+	url = https://github.com/jayeeson/coordinatorService
