@@ -1,13 +1,11 @@
 import express from 'express';
-import mysql from 'mysql';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import axios from 'axios';
-import passport from 'passport';
-import passportLocal from 'passport-local';
 import { DbOptions, ServiceData } from './types';
 import { dbCreation, dbConnect, seedDB } from './helpers/dbHelpers';
 import { router as coordinatorRoutes } from './routes/coordinator';
+import { router as userRoutes } from './routes/userAuthenticator';
 
 dotenv.config();
 
@@ -17,8 +15,6 @@ const hostname = process.env.HOST || 'localhost';
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3200;
 process.env.URL_ROOT = `http://${hostname}:${port}`;
 
-const LocalStrategy = passportLocal.Strategy;
-passport.use(new LocalStrategy((username, password, done) => {}));
 const app = express();
 
 const dbOptions: DbOptions = {
@@ -27,7 +23,7 @@ const dbOptions: DbOptions = {
   password: process.env.DBPASS as string,
 };
 
-const db = dbCreation(dbOptions);
+export const db = dbCreation(dbOptions);
 dbConnect(db);
 try {
   seedDB(db);
@@ -42,11 +38,7 @@ app.use(bodyParser.json());
 ////////////
 
 app.use(coordinatorRoutes);
-
-// GET HOMEPAGE ROUTE
-app.get('/', (req, res) => {
-  res.send('hit the main page of user_authentication');
-});
+app.use(userRoutes);
 
 // POST ROUTE
 //app.post('')

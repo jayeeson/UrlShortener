@@ -16,7 +16,7 @@ export const dbConnect = (db: mysql.Connection) => {
   });
 };
 
-export const asyncQuery = async <T>(
+export const asyncQuery = <T>(
   db: mysql.Connection,
   query: string,
   args?: any[]

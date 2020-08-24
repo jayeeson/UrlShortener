@@ -10,3 +10,9 @@ export interface ServiceData {
   name: string;
   url: string;
 }
+
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+}
