@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import { asyncQuery } from '../helpers/dbHelpers';
-import { db } from '../index';
+import config from '../config';
 import { getHashedPassword } from '../helpers/bcryptHelpers';
 import { User } from '../types';
 import { generateAccessToken } from '../helpers/jwt';
@@ -27,7 +27,7 @@ router.post('/create', async (req, res) => {
 
     const params = [username, hash];
     const row = await asyncQuery(
-      db,
+      config.db,
       'INSERT INTO user (username, password) VALUES (?,?)',
       params
     );
@@ -59,7 +59,7 @@ router.get('/login', async (req, res) => {
 
   try {
     const user: User[] = await asyncQuery(
-      db,
+      config.db,
       'SELECT * FROM user WHERE username = (?)',
       [username]
     );

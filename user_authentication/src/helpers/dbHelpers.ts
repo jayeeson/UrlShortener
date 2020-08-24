@@ -1,13 +1,14 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
+import config from '../config';
 
 // MySQL DB CONNECTION / SETUP
 
-export const dbCreation = (options: DbOptions) => {
+export const _dbCreation = (options: DbOptions) => {
   return mysql.createConnection(options);
 };
 
-export const dbConnect = (db: mysql.Connection) => {
+export const _dbConnect = (db: mysql.Connection) => {
   db.connect((err) => {
     if (err) {
       throw err;
@@ -16,22 +17,7 @@ export const dbConnect = (db: mysql.Connection) => {
   });
 };
 
-export const asyncQuery = <T>(
-  db: mysql.Connection,
-  query: string,
-  args?: any[]
-): Promise<T[]> => {
-  return new Promise<T[]>((resolve, reject) => {
-    db.query(query, args, (err, row) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(row);
-    });
-  });
-};
-
-export async function seedDB(db: mysql.Connection) {
+export async function _seedDB(db: mysql.Connection) {
   return new Promise(async (resolve, reject) => {
     try {
       const createDbResponse = await asyncQuery(
@@ -56,3 +42,18 @@ export async function seedDB(db: mysql.Connection) {
     }
   });
 }
+
+export const asyncQuery = <T>(
+  db: mysql.Connection,
+  query: string,
+  args?: any[]
+): Promise<T[]> => {
+  return new Promise<T[]>((resolve, reject) => {
+    db.query(query, args, (err, row) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
