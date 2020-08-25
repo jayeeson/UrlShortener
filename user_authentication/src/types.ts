@@ -18,3 +18,15 @@ export interface User {
   username: string;
   password: string;
 }
+
+export interface Blacklist {
+  id: number;
+  token: string;
+}
+
+export interface Token {
+  username: string;
+  iat: number;
+  exp: number;
+  [key: string]: any;
+}

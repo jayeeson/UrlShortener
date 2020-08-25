@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import config from '../config';
+import config from '../utils/config';
 import { Response, NextFunction, Request } from 'express';
 
 export const isSignedIn = (req: Request, res: Response, next: NextFunction) => {
@@ -10,10 +10,13 @@ export const isSignedIn = (req: Request, res: Response, next: NextFunction) => {
       console.log(decoded);
       ///\todo: check if blacklisted (blacklist on signout)
       next();
+    } else {
+      res.send('Do not have required access');
     }
   } catch (err) {
     console.log(err);
-    res.send('error, do not have required access');
+    res.send('error encountered. Do not have required access');
+    res.end();
   }
 };
 

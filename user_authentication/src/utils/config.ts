@@ -1,7 +1,7 @@
 import mysql from 'mysql';
 import dotenv from 'dotenv';
-import { DbOptions, ServiceData } from './types';
-import { _dbCreation, _dbConnect, _seedDB } from './helpers/dbHelpers';
+import { DbOptions, ServiceData } from '../types';
+import { _dbCreation, _dbConnect, _seedDB } from '../helpers/dbHelpers';
 import { Secret } from 'jsonwebtoken';
 
 dotenv.config();

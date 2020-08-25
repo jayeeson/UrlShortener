@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import { asyncQuery } from '../helpers/dbHelpers';
-import config from '../config';
+import config from '../utils/config';
 import { getHashedPassword } from '../helpers/bcryptHelpers';
 import { User } from '../types';
 import { generateJwt } from '../helpers/jwt';
@@ -15,7 +15,11 @@ router.get('/', (req, res) => {
 });
 
 // CREATE USER
-router.post('/create', async (req, res) => {
+router.get('/register', (req, res) => {
+  res.send('hit user registration page');
+});
+
+router.post('/register', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   if (!username || !password) {
@@ -48,7 +52,11 @@ router.post('/create', async (req, res) => {
   }
 });
 
-router.get('/login', async (req, res) => {
+router.get('/login', (req, res) => {
+  res.send('hit login page');
+});
+
+router.post('/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   console.log(req.body);
@@ -78,6 +86,19 @@ router.get('/login', async (req, res) => {
   } catch (err) {
     console.log(err);
     res.send('error logging in');
+  }
+});
+
+router.get('/logout', async (req, res) => {
+  const token = req.session!.jwt;
+  req.session!.jwt = null;
+  try {
+    await asyncQuery(config.db, 'INSERT INTO blacklist (token) VALUES (?)', [
+      token,
+    ]);
+    res.send('logged out');
+  } catch (err) {
+    res.send('error logging out');
   }
 });
 

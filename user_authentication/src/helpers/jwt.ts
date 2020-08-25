@@ -1,4 +1,4 @@
-import config from '../config';
+import config from '../utils/config';
 import jwt from 'jsonwebtoken';
 
 export const generateJwt = (username: string) => {

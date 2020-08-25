@@ -3,10 +3,11 @@ import bodyParser from 'body-parser';
 import axios from 'axios';
 import session from 'express-session';
 
-import config from './config';
+import config from './utils/config';
 import { router as coordinatorRoutes } from './routes/coordinator';
 import { router as userRoutes } from './routes/userAuthenticator';
 import { createSecretKey } from 'crypto';
+import { clearBlacklistOnInterval } from './utils/maintenance';
 
 const app = express();
 
@@ -22,6 +23,9 @@ app.use(
 
 app.use(coordinatorRoutes);
 app.use(userRoutes);
+
+const hours = 24;
+clearBlacklistOnInterval(hours);
 
 app.listen(config.port, config.hostname, () => {
   console.log(`Running user_authentication service on port ${config.port}`);

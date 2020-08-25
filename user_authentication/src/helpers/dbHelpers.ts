@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
-import config from '../config';
+import config from '../utils/config';
 import { resolve } from 'path';
 
 // MySQL DB CONNECTION / SETUP
