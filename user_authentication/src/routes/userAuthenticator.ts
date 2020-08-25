@@ -4,7 +4,8 @@ import { asyncQuery } from '../helpers/dbHelpers';
 import config from '../config';
 import { getHashedPassword } from '../helpers/bcryptHelpers';
 import { User } from '../types';
-import { generateAccessToken } from '../helpers/jwt';
+import { generateJwt } from '../helpers/jwt';
+import { isSignedIn } from '../middleware/users';
 
 export const router = express.Router();
 
@@ -67,8 +68,9 @@ router.get('/login', async (req, res) => {
     const correctPassword = await bcrypt.compare(password, user[0].password);
     if (correctPassword) {
       console.log('issue JWT token now!');
-      const jwtToken = generateAccessToken(username);
-      console.log(jwtToken);
+      const jwtToken = generateJwt(username);
+      req.session!.jwt = jwtToken;
+      console.log(req.session);
     } else {
       console.log('incorrect password');
     }
@@ -77,4 +79,8 @@ router.get('/login', async (req, res) => {
     console.log(err);
     res.send('error logging in');
   }
+});
+
+router.get('/stuff', isSignedIn, (req, res) => {
+  res.send('hit stuff route');
 });

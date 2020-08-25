@@ -1,13 +1,24 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import axios from 'axios';
+import session from 'express-session';
+
 import config from './config';
 import { router as coordinatorRoutes } from './routes/coordinator';
 import { router as userRoutes } from './routes/userAuthenticator';
+import { createSecretKey } from 'crypto';
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(
+  session({
+    secret: config.secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
 
 app.use(coordinatorRoutes);
 app.use(userRoutes);

@@ -1,11 +1,8 @@
-import jwt, { Secret } from 'jsonwebtoken';
+import config from '../config';
+import jwt from 'jsonwebtoken';
 
-export const generateAccessToken = (username: string) => {
-  if (process.env.SECRET_TOKEN === undefined) {
-    throw Error('missing SECRET_TOKEN environment variable');
-  }
-  const secret: Secret = process.env.SECRET_TOKEN;
-  return jwt.sign(username, secret, {
-    expiresIn: '7 days',
+export const generateJwt = (username: string) => {
+  return jwt.sign({ username: username }, config.secret, {
+    expiresIn: '15s',
   });
 };

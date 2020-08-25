@@ -2,6 +2,7 @@ import mysql from 'mysql';
 import dotenv from 'dotenv';
 import { DbOptions, ServiceData } from './types';
 import { _dbCreation, _dbConnect, _seedDB } from './helpers/dbHelpers';
+import { Secret } from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -10,6 +11,11 @@ const coordinatorUrl =
 const hostname = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3200;
 process.env.URL_ROOT = `http://${hostname}:${port}`;
+
+if (process.env.SECRET_TOKEN === undefined) {
+  throw Error('missing SECRET_TOKEN environment variable');
+}
+const secret = process.env.SECRET_TOKEN;
 
 const serviceData: ServiceData = {
   name: process.env.SERVICE_NAME ?? 'user_authentication',
@@ -40,6 +46,7 @@ export default {
   coordinatorUrl: coordinatorUrl,
   hostname: hostname,
   port: port,
+  secret: secret,
   serviceData: serviceData,
   db: connectDatabase(),
 };

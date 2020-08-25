@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export interface DbOptions {
   host: string;
   user: string;
