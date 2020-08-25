@@ -35,7 +35,7 @@ export async function _seedDB(db: mysql.Connection) {
     ];
 
     const queryResponses = queries.map((query) => {
-      asyncQuery(db, query);
+      asyncQuery<any>(db, query);
     });
 
     Promise.all(queryResponses).then((result) => {

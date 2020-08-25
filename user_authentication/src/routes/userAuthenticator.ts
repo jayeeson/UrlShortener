@@ -1,8 +1,8 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { asyncQuery } from '../helpers/dbHelpers';
+import { asyncQuery } from '../helpers/db';
 import config from '../utils/config';
-import { getHashedPassword } from '../helpers/bcryptHelpers';
+import { getHashedPassword } from '../helpers/bcrypt';
 import { User } from '../types';
 import { generateJwt } from '../helpers/jwt';
 import { isSignedIn } from '../middleware/users';
@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
     const hash = await getHashedPassword(password);
 
     const params = [username, hash];
-    const row = await asyncQuery(
+    const row = await asyncQuery<any>(
       config.db,
       'INSERT INTO user (username, password) VALUES (?,?)',
       params
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const user: User[] = await asyncQuery(
+    const user = await asyncQuery<User>(
       config.db,
       'SELECT * FROM user WHERE username = (?)',
       [username]
@@ -93,9 +93,11 @@ router.get('/logout', async (req, res) => {
   const token = req.session!.jwt;
   req.session!.jwt = null;
   try {
-    await asyncQuery(config.db, 'INSERT INTO blacklist (token) VALUES (?)', [
-      token,
-    ]);
+    await asyncQuery<any>(
+      config.db,
+      'INSERT INTO blacklist (token) VALUES (?)',
+      [token]
+    );
     res.send('logged out');
   } catch (err) {
     res.send('error logging out');

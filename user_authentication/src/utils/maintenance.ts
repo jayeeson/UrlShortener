@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import config from './config';
 
-import { asyncQuery } from '../helpers/dbHelpers';
+import { asyncQuery } from '../helpers/db';
 import { Blacklist, Token } from '../types';
 
 const msToHours = 1000 * 60 * 60;
@@ -14,7 +14,7 @@ export const clearBlacklistOnInterval = (hours: number) => {
 
 async function clearExpiredTokensFromBlacklist() {
   try {
-    const allRows: Blacklist[] = await asyncQuery(
+    const allRows = await asyncQuery<Blacklist>(
       config.db,
       'SELECT * FROM blacklist'
     );
@@ -31,9 +31,11 @@ async function clearExpiredTokensFromBlacklist() {
       }
 
       async function deleteThisToken() {
-        await asyncQuery(config.db, 'DELETE FROM blacklist WHERE token = (?)', [
-          token,
-        ]);
+        await asyncQuery<any>(
+          config.db,
+          'DELETE FROM blacklist WHERE token = (?)',
+          [token]
+        );
       }
     });
   } catch (err) {
