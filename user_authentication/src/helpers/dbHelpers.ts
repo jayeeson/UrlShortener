@@ -1,6 +1,7 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
 import config from '../config';
+import { resolve } from 'path';
 
 // MySQL DB CONNECTION / SETUP
 
@@ -18,29 +19,31 @@ export const _dbConnect = (db: mysql.Connection) => {
 };
 
 export async function _seedDB(db: mysql.Connection) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const createDbResponse = await asyncQuery(
-        db,
-        'CREATE DATABASE IF NOT EXISTS user_authentication;'
-      );
-      const useCoordinatorResponse = await asyncQuery(
-        db,
-        'USE user_authentication;'
-      );
-      const createTableResponse = await asyncQuery(
-        db,
-        `CREATE TABLE IF NOT EXISTS user (
+  try {
+    const queries = [
+      'CREATE DATABASE IF NOT EXISTS user_authentication;',
+      'USE user_authentication;',
+      `CREATE TABLE IF NOT EXISTS user (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           username VARCHAR(128) NOT NULL UNIQUE,
           password VARCHAR(128) NOT NULL
-        );`
-      );
-      resolve(createTableResponse);
-    } catch (err) {
-      console.log(err);
-    }
-  });
+        );`,
+      `CREATE TABLE IF NOT EXISTS blacklist (
+          id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          token VARCHAR(256) NOT NULL UNIQUE
+        );`,
+    ];
+
+    const queryResponses = queries.map((query) => {
+      asyncQuery(db, query);
+    });
+
+    Promise.all(queryResponses).then((result) => {
+      console.log(result);
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export const asyncQuery = <T>(
