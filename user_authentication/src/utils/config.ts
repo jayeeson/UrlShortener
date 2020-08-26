@@ -50,6 +50,10 @@ const jwt = {
   },
 };
 
+const blacklist = {
+  clearTimeIntervalMinutes: 15,
+};
+
 export default {
   coordinatorUrl: coordinatorUrl,
   hostname: hostname,
@@ -58,4 +62,5 @@ export default {
   serviceData: serviceData,
   db: connectDatabase(),
   jwt: jwt,
+  blacklist: blacklist,
 };

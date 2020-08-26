@@ -4,12 +4,12 @@ import config from './config';
 import { asyncQuery } from '../helpers/db';
 import { Blacklist, Token } from '../types';
 
-const msToHours = 1000 * 60 * 60;
+const msToMinutes = 1000 * 60;
 
-export const clearBlacklistOnInterval = (hours: number) => {
+export const clearBlacklistOnInterval = (minutes: number) => {
   setInterval(() => {
     clearExpiredTokensFromBlacklist();
-  }, hours * 1000);
+  }, msToMinutes * minutes);
 };
 
 async function clearExpiredTokensFromBlacklist() {
