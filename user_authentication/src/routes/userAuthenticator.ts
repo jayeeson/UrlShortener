@@ -20,8 +20,7 @@ router.get('/register', (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username, password } = req.body;
   if (!username || !password) {
     res.send('could not create user, missing either username or password');
     return;
@@ -31,7 +30,7 @@ router.post('/register', async (req, res) => {
     const hash = await getHashedPassword(password);
 
     const params = [username, hash];
-    const row = await asyncQuery<any>(
+    await asyncQuery<any>(
       config.db,
       'INSERT INTO user (username, password) VALUES (?,?)',
       params
@@ -57,8 +56,7 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username, password } = req.body;
   console.log(req.body);
 
   if (!username || !password) {
@@ -77,7 +75,9 @@ router.post('/login', async (req, res) => {
     if (correctPassword) {
       console.log('issue JWT token now!');
       const jwtToken = generateJwt(username);
-      req.session!.jwt = jwtToken;
+      if (req.session) {
+        req.session.jwt = jwtToken;
+      }
       console.log(req.session);
     } else {
       console.log('incorrect password');
@@ -90,8 +90,11 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/logout', async (req, res) => {
-  const token = req.session!.jwt;
-  req.session!.jwt = null;
+  const token = req.session?.jwt;
+  if (req.session) {
+    req.session.jwt = null;
+  }
+
   try {
     await asyncQuery<any>(
       config.db,
