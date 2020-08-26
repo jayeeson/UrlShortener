@@ -8,24 +8,10 @@ export const isSignedIn = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.session!.jwt;
+  const token: string | null = req.session!.jwt;
 
   try {
-    if (token) {
-      const decoded = jwt.verify(token, config.secret, { maxAge: '7d' });
-      console.log(decoded);
-
-      if (decoded) {
-        const row = await asyncQuery<any>(
-          config.db,
-          'SELECT * FROM blacklist WHERE (token) = (?)',
-          [token]
-        );
-
-        if (row.length > 0) {
-          forbidAccess(res);
-        }
-      }
+    if (token && isTokenValid(token, res)) {
       next();
     } else {
       forbidAccess(res);
@@ -39,6 +25,36 @@ export const isSignedIn = async (
 function forbidAccess(res: Response) {
   res.send('Do not have required access');
   res.end();
+}
+
+async function isTokenBlacklisted(token: string) {
+  try {
+    const row = await asyncQuery<any>(
+      config.db,
+      'SELECT * FROM blacklist WHERE (token) = (?)',
+      [token]
+    );
+
+    return row.length > 0;
+  } catch (err) {
+    console.log(err);
+    return true;
+  }
+}
+
+async function isTokenValid(token: string, res: Response) {
+  try {
+    const decoded = jwt.verify(token, config.secret, config.jwt.verify.options);
+    const isBlacklisted = await isTokenBlacklisted(token);
+    if (decoded && !isBlacklisted) {
+      return true;
+    }
+    console.log('invalid token');
+    return false;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 }
 
 ///\todo: middleware to ensure only THIS user can affect THIS user (Delete request...)

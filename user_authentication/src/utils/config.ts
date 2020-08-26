@@ -42,6 +42,14 @@ function connectDatabase() {
   return db;
 }
 
+const jwt = {
+  verify: {
+    options: {
+      maxAge: '7d',
+    },
+  },
+};
+
 export default {
   coordinatorUrl: coordinatorUrl,
   hostname: hostname,
@@ -49,4 +57,5 @@ export default {
   secret: secret,
   serviceData: serviceData,
   db: connectDatabase(),
+  jwt: jwt,
 };
