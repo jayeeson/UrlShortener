@@ -29,12 +29,12 @@ app.listen(config.port, config.hostname, () => {
   console.log(`Running user_authentication service on port ${config.port}`);
   axios
     .post(`${config.coordinatorUrl}/startnotification/`, config.serviceData)
-    .then((response) =>
+    .then(response =>
       console.log(
         `Start Notification sent to Coordinator.\n  status: ${response.status}\n  response data: ${response.data}`
       )
     )
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });

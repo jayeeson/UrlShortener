@@ -1,5 +1,3 @@
-import { Request } from 'express';
-
 export interface DbOptions {
   host: string;
   user: string;
@@ -28,5 +26,4 @@ export interface Token {
   username: string;
   iat: number;
   exp: number;
-  [key: string]: any;
 }

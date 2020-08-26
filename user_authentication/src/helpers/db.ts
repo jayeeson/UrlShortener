@@ -1,16 +1,31 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
-import config from '../utils/config';
-import { resolve } from 'path';
 
-// MySQL DB CONNECTION / SETUP
+export const asyncQuery = <T>(
+  db: mysql.Connection,
+  query: string,
+  args?: any[]
+): Promise<T[]> => {
+  return new Promise<T[]>((resolve, reject) => {
+    db.query(query, args, (err, row) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
+
+////////////////////////////////////////
+// MySQL DB CONNECTION / SETUP / SEED //
+////////////////////////////////////////
 
 export const _dbCreation = (options: DbOptions) => {
   return mysql.createConnection(options);
 };
 
 export const _dbConnect = (db: mysql.Connection) => {
-  db.connect((err) => {
+  db.connect(err => {
     if (err) {
       throw err;
     }
@@ -34,29 +49,14 @@ export async function _seedDB(db: mysql.Connection) {
         );`,
     ];
 
-    const queryResponses = queries.map((query) => {
+    const queryResponses = queries.map(query => {
       asyncQuery<any>(db, query);
     });
 
-    Promise.all(queryResponses).then((result) => {
+    Promise.all(queryResponses).then(result => {
       console.log(result);
     });
   } catch (err) {
     console.log(err);
   }
 }
-
-export const asyncQuery = <T>(
-  db: mysql.Connection,
-  query: string,
-  args?: any[]
-): Promise<T[]> => {
-  return new Promise<T[]>((resolve, reject) => {
-    db.query(query, args, (err, row) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(row);
-    });
-  });
-};

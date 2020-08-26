@@ -3,9 +3,10 @@ import bcrypt from 'bcrypt';
 import { asyncQuery } from '../helpers/db';
 import config from '../utils/config';
 import { getHashedPassword } from '../helpers/bcrypt';
-import { User } from '../types';
 import { generateJwt } from '../helpers/jwt';
 import { isSignedIn } from '../middleware/users';
+import { queryUser } from '../helpers/sql/user';
+import { insertTokenInBlacklist } from '../helpers/sql/blacklist';
 
 export const router = express.Router();
 
@@ -36,8 +37,8 @@ router.post('/register', async (req, res) => {
       params
     );
 
-    console.log('user created');
-    res.send('user created');
+    console.log(`user ${username} created`);
+    res.send('user created. please login.');
   } catch (err) {
     console.log(err);
     let message = '';
@@ -52,7 +53,7 @@ router.post('/register', async (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-  res.send('hit login page');
+  res.send('Hit login page');
 });
 
 router.post('/login', async (req, res) => {
@@ -60,50 +61,67 @@ router.post('/login', async (req, res) => {
   console.log(req.body);
 
   if (!username || !password) {
-    res.send('missing username / password');
-    return;
+    return res.send('Missing username / password');
   }
 
   try {
-    const user = await asyncQuery<User>(
-      config.db,
-      'SELECT * FROM user WHERE username = (?)',
-      [username]
-    );
+    const user = await queryUser(username);
+
+    if (!user) {
+      return res.send(`Username ${username} does not exist`);
+    }
 
     const correctPassword = await bcrypt.compare(password, user[0].password);
     if (correctPassword) {
-      console.log('issue JWT token now!');
-      const jwtToken = generateJwt(username);
+      const token = generateJwt(username);
       if (req.session) {
-        req.session.jwt = jwtToken;
+        req.session.token = token;
       }
       console.log(req.session);
     } else {
-      console.log('incorrect password');
+      return res.send('Incorrect password');
     }
-    res.send(`login route hit.... result = ${correctPassword}`);
+    res.send(`Now logged in as ${username}`);
   } catch (err) {
     console.log(err);
-    res.send('error logging in');
+    res.send('Error logging in');
   }
 });
 
 router.get('/logout', async (req, res) => {
-  const token = req.session?.jwt;
   if (req.session) {
-    req.session.jwt = null;
-  }
+    const { token } = req.session;
+    req.session.token = null;
 
+    try {
+      await insertTokenInBlacklist(token);
+      res.send('Logged out');
+    } catch (err) {
+      res.send('Error logging out');
+    }
+  }
+});
+
+router.get('/deleteUser', async (req, res) => {
+  const { username } = req.body;
   try {
-    await asyncQuery<any>(
-      config.db,
-      'INSERT INTO blacklist (token) VALUES (?)',
-      [token]
-    );
-    res.send('logged out');
+    const user = await queryUser(username);
+
+    if (user) {
+      await asyncQuery<any>(
+        config.db,
+        'DELETE FROM user WHERE username = (?)',
+        [username]
+      );
+
+      if (req.session) {
+        const { token } = req.session;
+        await insertTokenInBlacklist(token);
+      }
+    }
   } catch (err) {
-    res.send('error logging out');
+    console.log(err);
+    res.send('Could not delete user');
   }
 });
 

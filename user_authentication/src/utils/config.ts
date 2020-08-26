@@ -47,6 +47,11 @@ const jwt = {
       maxAge: '7d',
     },
   },
+  sign: {
+    options: {
+      expiresIn: '5m',
+    },
+  },
 };
 
 const blacklist = {
