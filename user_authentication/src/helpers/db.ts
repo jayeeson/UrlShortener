@@ -1,11 +1,7 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
 
-export const asyncQuery = <T>(
-  db: mysql.Connection,
-  query: string,
-  args?: any[]
-): Promise<T[]> => {
+export const asyncQuery = <T>(db: mysql.Connection, query: string, args?: any[]): Promise<T[]> => {
   return new Promise<T[]>((resolve, reject) => {
     db.query(query, args, (err, row) => {
       if (err) {

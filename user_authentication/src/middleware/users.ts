@@ -6,11 +6,7 @@ function forbidAccess(res: Response) {
   res.end();
 }
 
-export const isSignedIn = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const isSignedIn = async (req: Request, res: Response, next: NextFunction) => {
   const token: string | null = req.session?.token;
 
   try {

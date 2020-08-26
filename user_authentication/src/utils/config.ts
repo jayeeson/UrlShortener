@@ -5,8 +5,7 @@ import { _dbCreation, _dbConnect, _seedDB } from '../helpers/db';
 
 dotenv.config();
 
-const coordinatorUrl =
-  process.env.COORDINATOR_URL_ROOT ?? 'http://localhost:3000';
+const coordinatorUrl = process.env.COORDINATOR_URL_ROOT ?? 'http://localhost:3000';
 const hostname = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3200;
 process.env.URL_ROOT = `http://${hostname}:${port}`;

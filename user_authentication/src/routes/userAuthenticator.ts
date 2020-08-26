@@ -31,11 +31,7 @@ router.post('/register', async (req, res) => {
     const hash = await getHashedPassword(password);
 
     const params = [username, hash];
-    await asyncQuery<any>(
-      config.db,
-      'INSERT INTO user (username, password) VALUES (?,?)',
-      params
-    );
+    await asyncQuery<any>(config.db, 'INSERT INTO user (username, password) VALUES (?,?)', params);
 
     console.log(`user ${username} created`);
     res.send('user created. please login.');
@@ -108,11 +104,7 @@ router.get('/deleteUser', async (req, res) => {
     const user = await queryUser(username);
 
     if (user) {
-      await asyncQuery<any>(
-        config.db,
-        'DELETE FROM user WHERE username = (?)',
-        [username]
-      );
+      await asyncQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
 
       if (req.session) {
         const { token } = req.session;
