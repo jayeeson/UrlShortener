@@ -1,9 +1,10 @@
 import config from '../utils/config';
 import jwt from 'jsonwebtoken';
 import { isTokenBlacklisted } from './sql/blacklist';
+import { AccountType, Token } from '../types';
 
-export const generateJwt = (username: string) => {
-  return jwt.sign({ username: username }, config.secret, {
+export const generateJwt = (username: string, accountType: AccountType) => {
+  return jwt.sign({ username: username, accountType: accountType }, config.secret, {
     expiresIn: config.jwt.sign.options.expiresIn,
   });
 };
@@ -21,4 +22,11 @@ export async function isTokenValid(token: string) {
     console.log(err);
     return false;
   }
+}
+
+export async function useTokenIfValid(token: string) {
+  if (isTokenValid(token)) {
+    return jwt.verify(token, config.secret, config.jwt.verify.options) as Token;
+  }
+  return undefined;
 }

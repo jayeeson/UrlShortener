@@ -7,7 +7,7 @@ function forbidAccess(res: Response) {
 }
 
 export const isSignedIn = async (req: Request, res: Response, next: NextFunction) => {
-  const token: string | null = req.session?.token;
+  const token: string = req.session?.token;
 
   try {
     if (token && (await isTokenValid(token))) {

@@ -21,17 +21,12 @@ export async function deleteTokenFromBlacklist(token: string) {
 export async function clearExpiredTokensFromBlacklist() {
   try {
     const allRows = await asyncQuery<Blacklist>(config.db, 'SELECT * FROM blacklist');
-    allRows.map(row => {
+    allRows.map(async row => {
       const { token } = row;
-      const decoded = jwt.decode(token) as Token;
-
-      if (decoded) {
-        const now = Math.round(new Date().getTime() / 1000);
-        if (decoded.exp < now) {
-          deleteTokenFromBlacklist(token);
-        }
-      } else {
-        deleteTokenFromBlacklist(token);
+      try {
+        jwt.verify(token, config.secret) as Token;
+      } catch (err) {
+        await deleteTokenFromBlacklist(token);
       }
     });
   } catch (err) {

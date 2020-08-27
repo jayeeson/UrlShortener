@@ -3,38 +3,38 @@ import bcrypt from 'bcrypt';
 import { asyncQuery } from '../helpers/db';
 import config from '../utils/config';
 import { getHashedPassword } from '../helpers/bcrypt';
-import { generateJwt } from '../helpers/jwt';
+import { generateJwt, useTokenIfValid } from '../helpers/jwt';
 import { isSignedIn } from '../middleware/users';
-import { queryUser } from '../helpers/sql/user';
+import { queryUser, useRequestedAccountTypeIfAdmin } from '../helpers/sql/user';
 import { insertTokenInBlacklist } from '../helpers/sql/blacklist';
+import { User } from '../types';
 
 export const router = express.Router();
 
-// HOMEPAGE
 router.get('/', (req, res) => {
-  res.send('hit the main page of user_authentication');
+  res.send('Hit the main page of user_authentication');
 });
 
-// CREATE USER
 router.get('/register', (req, res) => {
-  res.send('hit user registration page');
+  res.send('Hit user registration page');
 });
 
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password }: User = req.body;
   if (!username || !password) {
-    res.send('could not create user, missing either username or password');
+    res.send('Could not create user, missing either username or password');
     return;
   }
 
   try {
     const hash = await getHashedPassword(password);
+    const insertAccountType = await useRequestedAccountTypeIfAdmin(req);
+    const params = [username, hash, insertAccountType];
 
-    const params = [username, hash];
-    await asyncQuery<any>(config.db, 'INSERT INTO user (username, password) VALUES (?,?)', params);
+    await asyncQuery<any>(config.db, 'INSERT INTO user (username, password, accountType) VALUES (?,?,?)', params);
 
     console.log(`user ${username} created`);
-    res.send('user created. please login.');
+    res.send('User created. Please login.');
   } catch (err) {
     console.log(err);
     let message = '';
@@ -53,8 +53,7 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  console.log(req.body);
+  const { username, password }: User = req.body;
 
   if (!username || !password) {
     return res.send('Missing username / password');
@@ -69,11 +68,10 @@ router.post('/login', async (req, res) => {
 
     const correctPassword = await bcrypt.compare(password, user[0].password);
     if (correctPassword) {
-      const token = generateJwt(username);
+      const token = generateJwt(username, user[0].accountType);
       if (req.session) {
         req.session.token = token;
       }
-      console.log(req.session);
     } else {
       return res.send('Incorrect password');
     }
@@ -99,21 +97,24 @@ router.get('/logout', async (req, res) => {
 });
 
 router.get('/deleteUser', async (req, res) => {
-  const { username } = req.body;
-  try {
-    const user = await queryUser(username);
+  const token = req.session?.token;
+  const decoded = await useTokenIfValid(token);
+  if (decoded) {
+    ///\todo: check if this works as intended (for admin AND for regular user):
+    const { username } = req.body ?? decoded;
+    console.log(`trying to delete user: ${username}`);
+    try {
+      const user = await queryUser(username);
 
-    if (user) {
-      await asyncQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
-
-      if (req.session) {
-        const { token } = req.session;
+      if (user) {
+        await asyncQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
         await insertTokenInBlacklist(token);
       }
+      res.send(`User ${username} deleted`);
+    } catch (err) {
+      console.log(err);
+      res.send('Could not delete user');
     }
-  } catch (err) {
-    console.log(err);
-    res.send('Could not delete user');
   }
 });
 

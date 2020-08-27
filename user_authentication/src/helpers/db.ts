@@ -37,7 +37,8 @@ export async function _seedDB(db: mysql.Connection) {
       `CREATE TABLE IF NOT EXISTS user (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           username VARCHAR(128) NOT NULL UNIQUE,
-          password VARCHAR(128) NOT NULL
+          password VARCHAR(128) NOT NULL,
+          accountType VARCHAR(16) NOT NULL
         );`,
       `CREATE TABLE IF NOT EXISTS blacklist (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

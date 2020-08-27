@@ -15,6 +15,7 @@ export interface User {
   id: number;
   username: string;
   password: string;
+  accountType: AccountType;
 }
 
 export interface Blacklist {
@@ -26,4 +27,9 @@ export interface Token {
   username: string;
   iat: number;
   exp: number;
+}
+
+export enum AccountType {
+  User = 'USER',
+  Admin = 'ADMIN',
 }
