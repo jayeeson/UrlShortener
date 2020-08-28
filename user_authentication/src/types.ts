@@ -1,3 +1,11 @@
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Session {
+      token: string;
+    }
+  }
+}
 export interface DbOptions {
   host: string;
   user: string;

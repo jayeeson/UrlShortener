@@ -12,8 +12,8 @@ export async function useRequestedAccountTypeIfAdmin(req: Request) {
   const { accountType }: User = req.body;
 
   if (accountType) {
-    const token: string = req.session?.token;
-    if ((await isTokenValid(token)) && isTokenOfAccountType(token, AccountType.Admin)) {
+    const token = req.session?.token;
+    if (token && (await isTokenValid(token)) && isTokenOfAccountType(token, AccountType.Admin)) {
       return accountType;
     }
   }
