@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { asyncQuery } from '../db';
 import config from '../../utils/config';
-import { Blacklist, Token } from '../../types';
+import { Blacklist, DecodedToken } from '../../types';
 
 export async function isTokenBlacklisted(token: string) {
   try {
@@ -24,7 +24,7 @@ export async function clearExpiredTokensFromBlacklist() {
     allRows.map(async row => {
       const { token } = row;
       try {
-        jwt.verify(token, config.secret) as Token;
+        jwt.verify(token, config.secret) as DecodedToken;
       } catch (err) {
         await deleteTokenFromBlacklist(token);
       }

@@ -23,8 +23,9 @@ export interface Blacklist {
   token: string;
 }
 
-export interface Token {
+export interface DecodedToken {
   username: string;
+  accountType: AccountType;
   iat: number;
   exp: number;
 }

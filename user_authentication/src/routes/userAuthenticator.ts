@@ -7,7 +7,7 @@ import { generateJwt, useTokenIfValid } from '../helpers/jwt';
 import { isSignedIn } from '../middleware/users';
 import { queryUser, useRequestedAccountTypeIfAdmin } from '../helpers/sql/user';
 import { insertTokenInBlacklist } from '../helpers/sql/blacklist';
-import { User } from '../types';
+import { User, AccountType } from '../types';
 
 export const router = express.Router();
 
@@ -100,8 +100,10 @@ router.get('/deleteUser', async (req, res) => {
   const token = req.session?.token;
   const decoded = await useTokenIfValid(token);
   if (decoded) {
-    ///\todo: check if this works as intended (for admin AND for regular user):
-    const { username } = req.body ?? decoded;
+    const { username } = req.body;
+    if (username !== decoded.username && decoded.accountType !== AccountType.Admin) {
+      return res.send('Do not have privileges to delete another user');
+    }
     console.log(`trying to delete user: ${username}`);
     try {
       const user = await queryUser(username);
