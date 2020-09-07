@@ -8,7 +8,7 @@ dotenv.config();
 const coordinatorUrl = process.env.COORDINATOR_URL_ROOT ?? 'http://localhost:3000';
 const hostname = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3200;
-process.env.URL_ROOT = `http://${hostname}:${port}`;
+const urlRoot = `http://${hostname}:${port}`;
 
 if (process.env.SECRET_TOKEN === undefined) {
   throw Error('missing SECRET_TOKEN environment variable');
@@ -17,7 +17,7 @@ const secret = process.env.SECRET_TOKEN;
 
 const serviceData: ServiceData = {
   name: process.env.SERVICE_NAME ?? 'user_authentication',
-  url: process.env.URL_ROOT ?? `http://${hostname}:${port}`,
+  url: urlRoot,
 };
 
 const dbOptions: DbOptions = {
@@ -57,13 +57,16 @@ const blacklist = {
   clearTimeIntervalMinutes: 15,
 };
 
+const exitSignals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
+
 export default {
-  coordinatorUrl: coordinatorUrl,
-  hostname: hostname,
-  port: port,
-  secret: secret,
-  serviceData: serviceData,
+  coordinatorUrl,
+  hostname,
+  port,
+  secret,
+  serviceData,
   db: connectDatabase(),
-  jwt: jwt,
-  blacklist: blacklist,
+  jwt,
+  blacklist,
+  exitSignals,
 };

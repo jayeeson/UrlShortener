@@ -6,7 +6,6 @@ declare namespace NodeJS {
     DBUSER: string;
     DBPASS: string;
     SERVICE_NAME: string;
-    URL_ROOT: string;
     COORDINATOR_URL_ROOT: string;
     SECRET_TOKEN: string;
   }
