@@ -85,7 +85,7 @@ router.post('/login', async (req, res) => {
 router.get('/logout', async (req, res) => {
   if (req.session) {
     const { token } = req.session;
-    req.session.token = null;
+    req.session.token = '';
 
     try {
       await insertTokenInBlacklist(token);
@@ -97,26 +97,29 @@ router.get('/logout', async (req, res) => {
 });
 
 router.get('/deleteUser', async (req, res) => {
-  const token = req.session?.token;
-  const decoded = await useTokenIfValid(token);
-  if (decoded) {
-    const { username } = req.body;
-    if (username !== decoded.username && decoded.accountType !== AccountType.Admin) {
-      return res.send('Do not have privileges to delete another user');
-    }
-    console.log(`trying to delete user: ${username}`);
-    try {
-      const user = await queryUser(username);
-
-      if (user) {
-        await asyncQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
-        await insertTokenInBlacklist(token);
+  if (req.session && req.session.token) {
+    const { token } = req.session;
+    const decoded = await useTokenIfValid(token);
+    if (decoded) {
+      const { username } = req.body;
+      if (username !== decoded.username && decoded.accountType !== AccountType.Admin) {
+        return res.send('Do not have privileges to delete another user');
       }
-      res.send(`User ${username} deleted`);
-    } catch (err) {
-      console.log(err);
-      res.send('Could not delete user');
+      try {
+        const user = await queryUser(username);
+
+        if (user) {
+          await asyncQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
+          await insertTokenInBlacklist(token);
+        }
+        res.send(`User ${username} deleted`);
+      } catch (err) {
+        console.log(err);
+        res.send('Could not delete user');
+      }
     }
+  } else {
+    res.send('Do not have privileges to delete another user');
   }
 });
 
