@@ -13,10 +13,14 @@ const urlRoot = `http://${hostname}:${port}`;
 if (process.env.SECRET_TOKEN === undefined) {
   throw Error('missing SECRET_TOKEN environment variable');
 }
+
+if (process.env.SERVICE_NAME === undefined) {
+  throw Error('missing SERVICE_NAME environment variable');
+}
 const secret = process.env.SECRET_TOKEN;
 
 const serviceData: ServiceData = {
-  name: process.env.SERVICE_NAME ?? 'user_authentication',
+  name: process.env.SERVICE_NAME,
   url: urlRoot,
 };
 

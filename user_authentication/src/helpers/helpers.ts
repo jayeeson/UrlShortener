@@ -1,7 +1,7 @@
 import mysql from 'mysql';
 import axios from 'axios';
 import { Server } from 'http';
-import { ServiceData } from '../types';
+import config from '../utils/config';
 
 function exitDb(db: mysql.Connection) {
   db.end(err => {
@@ -12,37 +12,25 @@ function exitDb(db: mysql.Connection) {
   });
 }
 
-export async function exitGracefully(
-  code: NodeJS.Signals,
-  server: Server,
-  coordinatorUrl: string,
-  serviceData: ServiceData,
-  db?: mysql.Connection
-) {
+export async function exitGracefully(code: NodeJS.Signals, server: Server) {
   // notify coordinator service
   console.log(`About to exit with code ${code}`);
-  await axios.post(`${coordinatorUrl}/exitnotification`, serviceData).catch(err => console.log(err));
+  await axios.post(`${config.coordinatorUrl}/exitnotification`, config.serviceData).catch(err => console.log(err));
 
   // close all open handles
   server.close(() => {
     console.log('Server successfully terminated');
-    if (db) {
-      exitDb(db);
+    if (config.db) {
+      exitDb(config.db);
     }
     process.exit(1);
   });
 }
 
-export function exitGracefullyOnSignals(
-  signals: NodeJS.Signals[],
-  server: Server,
-  coordinatorUrl: string,
-  serviceData: ServiceData,
-  db?: mysql.Connection
-) {
+export function exitGracefullyOnSignals(signals: NodeJS.Signals[], server: Server) {
   signals.forEach(signal => {
     process.on(signal, code => {
-      exitGracefully(code, server, coordinatorUrl, serviceData, db);
+      exitGracefully(code, server);
     });
   });
 }

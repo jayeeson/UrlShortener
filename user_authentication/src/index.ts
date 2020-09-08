@@ -7,6 +7,7 @@ import config from './utils/config';
 import { router as coordinatorRoutes } from './routes/coordinator';
 import { router as userRoutes } from './routes/userAuthenticator';
 import { clearBlacklistOnInterval } from './utils/maintenance';
+import { exitGracefullyOnSignals } from './helpers/helpers';
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use(userRoutes);
 
 clearBlacklistOnInterval(config.blacklist.clearTimeIntervalMinutes);
 
-app.listen(config.port, config.hostname, () => {
+const server = app.listen(config.port, config.hostname, () => {
   console.log(`Running user_authentication service on port ${config.port}`);
   axios
     .post(`${config.coordinatorUrl}/startnotification/`, config.serviceData)
@@ -38,3 +39,5 @@ app.listen(config.port, config.hostname, () => {
       console.log(err);
     });
 });
+
+exitGracefullyOnSignals(config.exitSignals, server);
