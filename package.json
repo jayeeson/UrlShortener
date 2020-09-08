@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@types/redis": "^2.8.27"
-  }
-}
