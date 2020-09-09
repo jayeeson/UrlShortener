@@ -1,11 +1,11 @@
-import { asyncQuery } from '../db';
+import { sqlQuery } from '../db';
 import { User, AccountType } from '../../types';
 import config from '../../utils/config';
 import { isTokenValid, isTokenOfAccountType } from '../jwt';
 import { Request } from 'express';
 
 export async function queryUser(username: string) {
-  return await asyncQuery<User>(config.db, 'SELECT * FROM user WHERE username = (?)', [username]);
+  return await sqlQuery<User>(config.db, 'SELECT * FROM user WHERE username = (?)', [username]);
 }
 
 export async function useRequestedAccountTypeIfAdmin(req: Request) {

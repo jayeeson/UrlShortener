@@ -1,8 +1,19 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
 
-export const asyncQuery = <T>(db: mysql.Connection, query: string, args?: any[]): Promise<T[]> => {
+export const sqlQuery = <T>(db: mysql.Connection, query: string, args?: any[]): Promise<T[]> => {
   return new Promise<T[]>((resolve, reject) => {
+    db.query(query, args, (err, row) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(row);
+    });
+  });
+};
+
+export const sqlAlter = async <T>(db: mysql.Connection, query: string, args?: any[]): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
     db.query(query, args, (err, row) => {
       if (err) {
         reject(err);
@@ -47,7 +58,7 @@ export async function _seedDB(db: mysql.Connection) {
     ];
 
     const queryResponses = queries.map(query => {
-      asyncQuery<any>(db, query);
+      sqlQuery<any>(db, query);
     });
 
     Promise.all(queryResponses).then(result => {

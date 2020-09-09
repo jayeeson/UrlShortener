@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { asyncQuery } from '../helpers/db';
+import { sqlQuery, sqlAlter } from '../helpers/db';
 import config from '../utils/config';
 import { getHashedPassword } from '../helpers/bcrypt';
 import { generateJwt, useTokenIfValid } from '../helpers/jwt';
@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
     const insertAccountType = await useRequestedAccountTypeIfAdmin(req);
     const params = [username, hash, insertAccountType];
 
-    await asyncQuery<any>(config.db, 'INSERT INTO user (username, password, accountType) VALUES (?,?,?)', params);
+    await sqlAlter<any>(config.db, 'INSERT INTO user (username, password, accountType) VALUES (?,?,?)', params);
 
     console.log(`user ${username} created`);
     res.send('User created. Please login.');
@@ -109,7 +109,7 @@ router.get('/deleteUser', async (req, res) => {
         const user = await queryUser(username);
 
         if (user) {
-          await asyncQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
+          await sqlQuery<any>(config.db, 'DELETE FROM user WHERE username = (?)', [username]);
           await insertTokenInBlacklist(token);
         }
         res.send(`User ${username} deleted`);
