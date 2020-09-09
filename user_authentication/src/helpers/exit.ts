@@ -2,29 +2,21 @@ import mysql from 'mysql';
 import axios from 'axios';
 import { Server } from 'http';
 import config from '../utils/config';
-
-function exitDb(db: mysql.Connection) {
-  db.end(err => {
-    if (err) {
-      console.log(`error: ${err.message}`);
-    }
-    console.log('Closed the database connection');
-  });
-}
+import { exitDb } from './db';
 
 export async function exitGracefully(code: NodeJS.Signals, server: Server) {
-  // notify coordinator service
   console.log(`About to exit with code ${code}`);
-  await axios.post(`${config.coordinatorUrl}/exitnotification`, config.serviceData).catch(err => console.log(err));
+  try {
+    await axios.post(`${config.coordinatorUrl}/exitnotification`, { serviceData: config.serviceData });
 
-  // close all open handles
-  server.close(() => {
+    server.close();
+    exitDb(config.db);
     console.log('Server successfully terminated');
-    if (config.db) {
-      exitDb(config.db);
-    }
+  } catch (err) {
+    console.log(err);
+  } finally {
     process.exit(1);
-  });
+  }
 }
 
 export function exitGracefullyOnSignals(signals: NodeJS.Signals[], server: Server) {

@@ -68,3 +68,14 @@ export async function _seedDB(db: mysql.Connection) {
     console.log(err);
   }
 }
+
+export function exitDb(db: mysql.Connection) {
+  if (db) {
+    db.end(err => {
+      if (err) {
+        console.log(`error: ${err.message}`);
+      }
+      console.log('Closed the database connection');
+    });
+  }
+}
