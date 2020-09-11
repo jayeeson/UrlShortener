@@ -27,11 +27,11 @@ export const sqlAlter = async <T>(db: mysql.Connection, query: string, args?: an
 // MySQL DB CONNECTION / SETUP / SEED //
 ////////////////////////////////////////
 
-export const _dbCreation = (options: DbOptions) => {
+export const _dbCreation = (options: DbOptions): mysql.Connection => {
   return mysql.createConnection(options);
 };
 
-export const _dbConnect = (db: mysql.Connection) => {
+export const _dbConnect = (db: mysql.Connection): void => {
   db.connect(err => {
     if (err) {
       throw err;
@@ -40,7 +40,7 @@ export const _dbConnect = (db: mysql.Connection) => {
   });
 };
 
-export async function _seedDB(db: mysql.Connection) {
+export async function _seedDB(db: mysql.Connection): Promise<void> {
   try {
     const queries = [
       'CREATE DATABASE IF NOT EXISTS user_authentication;',
@@ -69,7 +69,7 @@ export async function _seedDB(db: mysql.Connection) {
   }
 }
 
-export function exitDb(db: mysql.Connection) {
+export function exitDb(db: mysql.Connection): void {
   if (db) {
     db.end(err => {
       if (err) {

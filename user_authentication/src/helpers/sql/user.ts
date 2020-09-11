@@ -4,11 +4,11 @@ import config from '../../utils/config';
 import { isTokenValid, isTokenOfAccountType } from '../jwt';
 import { Request } from 'express';
 
-export async function queryUser(username: string) {
+export async function queryUser(username: string): Promise<User[]> {
   return await sqlQuery<User>(config.db, 'SELECT * FROM user WHERE username = (?)', [username]);
 }
 
-export async function useRequestedAccountTypeIfAdmin(req: Request) {
+export async function useRequestedAccountTypeIfAdmin(req: Request): Promise<AccountType> {
   const { accountType }: User = req.body;
 
   if (accountType) {

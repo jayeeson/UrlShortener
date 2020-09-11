@@ -6,7 +6,7 @@ function forbidAccess(res: Response) {
   res.end();
 }
 
-export const isSignedIn = async (req: Request, res: Response, next: NextFunction) => {
+export async function isSignedIn(req: Request, res: Response, next: NextFunction): Promise<void> {
   const token = req.session?.token;
 
   try {
@@ -19,6 +19,4 @@ export const isSignedIn = async (req: Request, res: Response, next: NextFunction
     console.log(err);
     forbidAccess(res);
   }
-};
-
-///\todo: middleware to ensure only THIS user can affect THIS user (Delete request...)
+}
