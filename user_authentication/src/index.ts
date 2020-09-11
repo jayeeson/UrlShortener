@@ -32,7 +32,7 @@ const server = app.listen(config.port, config.hostname, () => {
     .post(`${config.coordinatorUrl}/startnotification/`, { serviceData: config.serviceData })
     .then(response =>
       console.log(
-        `Start Notification sent to Coordinator.\n  status: ${response.status}\n  response data: ${response.data}`
+        `Start Notification response received from Coordinator:\n  status: ${response.status}\n  response data: ${response.data}`
       )
     )
     .catch(err => {

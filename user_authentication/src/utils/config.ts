@@ -2,12 +2,17 @@ import mysql from 'mysql';
 import dotenv from 'dotenv';
 import { DbOptions, ServiceData } from '../types';
 import { createPoolAndHandleDisconnect, seedDB } from '../helpers/db';
+import { getPort } from '../helpers/port';
 
 dotenv.config();
 
+const argStrings = {
+  port: 'port=',
+};
+
 const coordinatorUrl = process.env.COORDINATOR_URL_ROOT ?? 'http://localhost:3000';
 const hostname = process.env.HOST ?? 'localhost';
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3200;
+const port = getPort(argStrings.port, process.env.PORT) ?? 3200;
 const urlRoot = `http://${hostname}:${port}`;
 
 if (process.env.SECRET_TOKEN === undefined) {

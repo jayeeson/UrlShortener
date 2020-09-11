@@ -32,8 +32,8 @@ export async function seedDB(dbOptions: DbOptions): Promise<void> {
     const db = mysql.createConnection(dbOptions);
     db.connect();
     const queries = [
-      'CREATE DATABASE IF NOT EXISTS user_authentication;',
-      'USE user_authentication;',
+      `CREATE DATABASE IF NOT EXISTS ${process.env.SERVICE_NAME};`,
+      `USE ${process.env.SERVICE_NAME}`,
       `CREATE TABLE IF NOT EXISTS user (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           username VARCHAR(128) NOT NULL UNIQUE,
