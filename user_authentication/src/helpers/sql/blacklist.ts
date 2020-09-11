@@ -5,7 +5,7 @@ import { Blacklist, DecodedToken } from '../../types';
 
 export async function isTokenBlacklisted(token: string): Promise<boolean> {
   try {
-    const row = await sqlQuery<any>(config.db, 'SELECT * FROM blacklist WHERE (token) = (?)', [token]);
+    const row = await sqlQuery<any>(await config.pool, 'SELECT * FROM blacklist WHERE (token) = (?)', [token]);
 
     return row.length > 0;
   } catch (err) {
@@ -15,12 +15,12 @@ export async function isTokenBlacklisted(token: string): Promise<boolean> {
 }
 
 export async function deleteTokenFromBlacklist(token: string): Promise<void> {
-  await sqlAlter<any>(config.db, 'DELETE FROM blacklist WHERE token = (?)', [token]);
+  await sqlAlter<any>(await config.pool, 'DELETE FROM blacklist WHERE token = (?)', [token]);
 }
 
 export async function clearExpiredTokensFromBlacklist(): Promise<void> {
   try {
-    const allRows = await sqlQuery<Blacklist>(config.db, 'SELECT * FROM blacklist');
+    const allRows = await sqlQuery<Blacklist>(await config.pool, 'SELECT * FROM blacklist');
     allRows.map(async row => {
       const { token } = row;
       try {
@@ -35,5 +35,5 @@ export async function clearExpiredTokensFromBlacklist(): Promise<void> {
 }
 
 export async function insertTokenInBlacklist(token: string): Promise<void> {
-  await sqlAlter<any>(config.db, 'INSERT INTO blacklist (token) VALUES (?)', [token]);
+  await sqlAlter<any>(await config.pool, 'INSERT INTO blacklist (token) VALUES (?)', [token]);
 }

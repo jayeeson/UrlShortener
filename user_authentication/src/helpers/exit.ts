@@ -9,7 +9,7 @@ export async function exitGracefully(code: NodeJS.Signals, server: Server): Prom
     await axios.post(`${config.coordinatorUrl}/exitnotification`, { serviceData: config.serviceData });
 
     server.close();
-    exitDb(config.db);
+    exitDb(await config.pool);
     console.log('Server successfully terminated');
   } catch (err) {
     console.log(err);

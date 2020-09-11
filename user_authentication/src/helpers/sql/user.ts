@@ -5,7 +5,7 @@ import { isTokenValid, isTokenOfAccountType } from '../jwt';
 import { Request } from 'express';
 
 export async function queryUser(username: string): Promise<User[]> {
-  return await sqlQuery<User>(config.db, 'SELECT * FROM user WHERE username = (?)', [username]);
+  return await sqlQuery<User>(await config.pool, 'SELECT * FROM user WHERE username = (?)', [username]);
 }
 
 export async function useRequestedAccountTypeIfAdmin(req: Request): Promise<AccountType> {

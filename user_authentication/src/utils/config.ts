@@ -1,7 +1,7 @@
 import mysql from 'mysql';
 import dotenv from 'dotenv';
 import { DbOptions, ServiceData } from '../types';
-import { _dbCreation, _dbConnect, _seedDB } from '../helpers/db';
+import { createPoolAndHandleDisconnect, seedDB } from '../helpers/db';
 
 dotenv.config();
 
@@ -24,24 +24,29 @@ const serviceData: ServiceData = {
   url: urlRoot,
 };
 
-const dbOptions: DbOptions = {
+const seedDbOptions: DbOptions = {
   host: hostname,
-  user: process.env.DBUSER as string,
-  password: process.env.DBPASS as string,
+  user: process.env.DBUSER ?? '',
+  password: process.env.DBPASS ?? '',
 };
 
-let db: mysql.Connection;
-function connectDatabase() {
-  if (!db) {
-    db = _dbCreation(dbOptions);
-    _dbConnect(db);
-    try {
-      _seedDB(db);
-    } catch (err) {
-      console.log(err);
-    }
+const poolDbOptions: DbOptions = {
+  ...seedDbOptions,
+  database: process.env.SERVICE_NAME,
+};
+
+let dbSeeded = false;
+let pool: mysql.Pool;
+async function connectPool() {
+  if (!dbSeeded) {
+    await seedDB(seedDbOptions);
   }
-  return db;
+  dbSeeded = true;
+
+  if (!pool) {
+    pool = createPoolAndHandleDisconnect(poolDbOptions);
+  }
+  return pool;
 }
 
 const jwt = {
@@ -69,7 +74,7 @@ export default {
   port,
   secret,
   serviceData,
-  db: connectDatabase(),
+  pool: connectPool(),
   jwt,
   blacklist,
   exitSignals,

@@ -1,9 +1,9 @@
 import mysql from 'mysql';
 import { DbOptions } from '../types';
 
-export const sqlQuery = <T>(db: mysql.Connection, query: string, args?: any[]): Promise<T[]> => {
+export const sqlQuery = <T>(pool: mysql.Pool, query: string, args?: any[]): Promise<T[]> => {
   return new Promise<T[]>((resolve, reject) => {
-    db.query(query, args, (err, row) => {
+    pool.query(query, args, (err, row) => {
       if (err) {
         reject(err);
       }
@@ -12,9 +12,9 @@ export const sqlQuery = <T>(db: mysql.Connection, query: string, args?: any[]): 
   });
 };
 
-export const sqlAlter = async <T>(db: mysql.Connection, query: string, args?: any[]): Promise<T> => {
+export const sqlAlter = async <T>(pool: mysql.Pool, query: string, args?: any[]): Promise<T> => {
   return new Promise<T>((resolve, reject) => {
-    db.query(query, args, (err, row) => {
+    pool.query(query, args, (err, row) => {
       if (err) {
         reject(err);
       }
@@ -27,21 +27,10 @@ export const sqlAlter = async <T>(db: mysql.Connection, query: string, args?: an
 // MySQL DB CONNECTION / SETUP / SEED //
 ////////////////////////////////////////
 
-export const _dbCreation = (options: DbOptions): mysql.Connection => {
-  return mysql.createConnection(options);
-};
-
-export const _dbConnect = (db: mysql.Connection): void => {
-  db.connect(err => {
-    if (err) {
-      throw err;
-    }
-    console.log('connected to MySQL server');
-  });
-};
-
-export async function _seedDB(db: mysql.Connection): Promise<void> {
+export async function seedDB(dbOptions: DbOptions): Promise<void> {
   try {
+    const db = mysql.createConnection(dbOptions);
+    db.connect();
     const queries = [
       'CREATE DATABASE IF NOT EXISTS user_authentication;',
       'USE user_authentication;',
@@ -58,20 +47,42 @@ export async function _seedDB(db: mysql.Connection): Promise<void> {
     ];
 
     const queryResponses = queries.map(query => {
-      sqlQuery<any>(db, query);
+      return new Promise<string>((resolve, reject) => {
+        db.query(query, (err, row) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(row);
+        });
+      });
     });
 
-    Promise.all(queryResponses).then(result => {
-      console.log(result);
+    return Promise.all(queryResponses).then(() => {
+      db.end();
     });
   } catch (err) {
     console.log(err);
   }
 }
 
-export function exitDb(db: mysql.Connection): void {
-  if (db) {
-    db.end(err => {
+let pool: mysql.Pool;
+export function createPoolAndHandleDisconnect(dbOptions: DbOptions): mysql.Pool {
+  pool = mysql.createPool(dbOptions);
+  pool.on('error', err => {
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      setTimeout(() => {
+        createPoolAndHandleDisconnect(dbOptions);
+      }, 3000);
+    } else {
+      throw err;
+    }
+  });
+  return pool;
+}
+
+export function exitDb(pool: mysql.Pool): void {
+  if (pool) {
+    pool.end(err => {
       if (err) {
         console.log(`error: ${err.message}`);
       }
