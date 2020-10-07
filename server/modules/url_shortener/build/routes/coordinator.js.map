@@ -1,0 +1,1 @@
+{"version":3,"file":"coordinator.js","sourceRoot":"","sources":["../../src/routes/coordinator.ts"],"names":[],"mappings":";;;;;;AAAA,oDAA8B;AAEjB,QAAA,MAAM,GAAG,iBAAO,CAAC,MAAM,EAAE,CAAC;AAEvC,cAAM,CAAC,GAAG,CAAC,OAAO,EAAE,UAAC,GAAG,EAAE,GAAG;IAC3B,GAAG,CAAC,IAAI,CAAC,EAAE,WAAW,EAAE,OAAO,CAAC,GAAG,CAAC,YAAY,EAAE,CAAC,CAAC;AACtD,CAAC,CAAC,CAAC"}
