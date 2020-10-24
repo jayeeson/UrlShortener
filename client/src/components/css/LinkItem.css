@@ -1,0 +1,15 @@
+.shortlink {
+  background-color: #288dd1 !important;
+  color: white;
+  font-weight: 700;
+}
+
+div.shortlink:hover {
+  background-color: #58ec7d !important;
+  cursor: pointer;
+}
+
+div.shortlink:hover label {
+  background-color: #58ec7d !important;
+  cursor: pointer;
+}
