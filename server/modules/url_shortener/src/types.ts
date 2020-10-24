@@ -20,3 +20,16 @@ export enum StateChange {
   offline = 0,
   online = 1,
 }
+
+export interface DecodedToken {
+  username: string;
+  accountType: AccountType;
+  iat: number;
+  exp: number;
+}
+
+export enum AccountType {
+  User = 'USER',
+  Admin = 'ADMIN',
+  Guest = 'GUEST',
+}

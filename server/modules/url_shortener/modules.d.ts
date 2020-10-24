@@ -8,5 +8,7 @@ declare namespace NodeJS {
     SERVICE_NAME: string | undefined;
     COORDINATOR_URL_ROOT: string | undefined;
     UEI: string | undefined;
+    USER_AUTH_JWT_KEY: string | undefined;
+    LOAD_BALANCER_URL_ROOT: string | undefined;
   }
 }

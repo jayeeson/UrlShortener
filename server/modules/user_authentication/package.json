@@ -13,21 +13,26 @@
   "license": "ISC",
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
+    "@types/cookie-parser": "^1.4.2",
     "@types/express-session": "^1.17.0",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.0.26",
     "@types/passport": "^1.0.4",
     "@types/passport-local": "^1.0.33",
+    "@types/uuid": "^8.3.0",
     "acorn": "^7.1.1",
     "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.5",
     "express-session": "^1.17.1",
     "jsonwebtoken": "^8.5.1",
     "kind-of": "^6.0.3",
     "lodash": "^4.17.19",
     "minimist": "^0.2.1",
     "passport": "^0.4.1",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "rsa-keypair": "^2.0.2",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",

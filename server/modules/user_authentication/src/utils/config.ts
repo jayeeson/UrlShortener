@@ -1,5 +1,7 @@
+import fs from 'fs';
 import mysql from 'mysql';
 import dotenv from 'dotenv';
+import { Algorithm } from 'jsonwebtoken';
 import { DbOptions, ServiceData } from '../types';
 import { createPoolAndHandleDisconnect, seedDB } from '../helpers/db';
 import { getPort } from '../helpers/port';
@@ -22,7 +24,10 @@ if (process.env.SECRET_TOKEN === undefined) {
 if (process.env.SERVICE_NAME === undefined) {
   throw Error('missing SERVICE_NAME environment variable');
 }
-const secret = process.env.SECRET_TOKEN;
+const secret = {
+  privateKey: fs.readFileSync('privkey.pem'),
+  publicKey: fs.readFileSync('pubkey.pem'),
+};
 
 const serviceData: ServiceData = {
   name: process.env.SERVICE_NAME,
@@ -62,9 +67,12 @@ const jwt = {
   },
   sign: {
     options: {
-      expiresIn: '5m',
+      expiresIn: '7d',
+      algorithm: 'RS256' as Algorithm,
     },
   },
+  cookieName: 'auth-jwt',
+  guestCookie: 'guest-jwt',
 };
 
 const blacklist = {

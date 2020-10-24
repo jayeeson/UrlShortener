@@ -38,14 +38,7 @@ export async function sendUserAuthenticatorUpdateToUrlShorteners(
   userAuthenticatorUpdate: UserAuthenticatorUpdate[]
 ): Promise<void> {
   try {
-    const activeServices = await queryActiveServices(pool);
-    const urlShorteners = activeServices.filter(service => service.name === ServiceNames.urlShortener);
-
-    urlShorteners.map(urlShortener => {
-      axios
-        .post(`${urlShortener.url}/userauthenticator/update`, { userAuthenticatorUpdate })
-        .catch(err => console.log(err));
-    });
+    genericSendServiceToAllUrlShorteners(pool, userAuthenticatorUpdate, '/userauthenticator/update');
     console.log('Update to user authenticator sent to all url Shorteners');
   } catch (err) {
     console.log(err);
@@ -70,4 +63,44 @@ export async function getExpiredServices(services: ServiceData[]): Promise<(Serv
       }
     })
   );
+}
+
+export async function sendLoadBalancerToUrlShortener(pool: mysql.Pool, serviceData: ServiceData): Promise<void> {
+  const activeServices = await queryActiveServices(pool);
+  const loadBalancer = activeServices.find(service => service.name === ServiceNames.loadBalancer);
+
+  if (!loadBalancer) {
+    return;
+  }
+
+  axios.post(`${serviceData.url}/loadbalancer`, { serviceUpdate: loadBalancer });
+}
+
+export async function sendLoadBalancerToAllUrlShorteners(
+  pool: mysql.Pool,
+  loadBalancerData: ServiceData
+): Promise<void> {
+  try {
+    genericSendServiceToAllUrlShorteners(pool, loadBalancerData, '/loadbalancer');
+    console.log('Load balancer sent to all url Shorteners');
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function genericSendServiceToAllUrlShorteners(
+  pool: mysql.Pool,
+  update: ServiceData | UserAuthenticatorUpdate[],
+  route: string
+): Promise<void> {
+  try {
+    const activeServices = await queryActiveServices(pool);
+    const urlShorteners = activeServices.filter(service => service.name === ServiceNames.urlShortener);
+
+    urlShorteners.map(urlShortener => {
+      axios.post(`${urlShortener.url + route}`, { serviceUpdate: update }).catch(err => console.log(err));
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }

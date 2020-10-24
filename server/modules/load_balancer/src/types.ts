@@ -29,3 +29,17 @@ export enum IsRequestAllowed {
   YES = 0,
   REQUEST_LIMIT_EXCEEDED = 1,
 }
+
+export interface ServiceUrls {
+  loadBalancer: string[];
+  urlShortener: string[];
+  userAuthenticator: string[];
+}
+
+export interface ServiceNames {
+  urlShortener: ServiceNameTypes;
+  userAuthenticator: ServiceNameTypes;
+  loadBalancer: ServiceNameTypes;
+}
+
+export type ServiceNameTypes = 'url_shortener' | 'user_authenticator' | 'load_balancer';

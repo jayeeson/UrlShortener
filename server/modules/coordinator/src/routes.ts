@@ -3,6 +3,8 @@ import mysql, { OkPacket } from 'mysql';
 import { ServiceData, ServiceNames, StateChange } from './types';
 import { sqlQuery, sqlAlter } from './helpers/db';
 import {
+  sendLoadBalancerToAllUrlShorteners,
+  sendLoadBalancerToUrlShortener,
   sendServiceUpdateToLoadBalancer,
   sendUei,
   sendUserAuthenticatorsToUrlShortener,
@@ -50,10 +52,13 @@ export const routes = (pool: mysql.Pool): Router => {
         sendServiceUpdateToLoadBalancer(pool);
         if (serviceData.name === ServiceNames.urlShortener) {
           await sendUei(serviceData, queryResponse.insertId);
-          sendUserAuthenticatorsToUrlShortener(await config.pool, serviceData);
+          sendUserAuthenticatorsToUrlShortener(pool, serviceData);
+          sendLoadBalancerToUrlShortener(pool, serviceData);
         } else if (serviceData.name === ServiceNames.userAuthenticator) {
           const userAuthenticatorUpdate = [{ userAuthenticator: serviceData, state: StateChange.online }];
-          sendUserAuthenticatorUpdateToUrlShorteners(await config.pool, userAuthenticatorUpdate);
+          sendUserAuthenticatorUpdateToUrlShorteners(pool, userAuthenticatorUpdate);
+        } else if (serviceData.name === ServiceNames.loadBalancer) {
+          sendLoadBalancerToAllUrlShorteners(pool, serviceData);
         }
 
         const serviceAddedMessage = `Adding row for service ${serviceData.name.toLocaleUpperCase()}; url=${serviceData.url.toLocaleUpperCase()}`;

@@ -1,4 +1,5 @@
 import express from 'express';
+import { getUserAuthenticatorPublicKey } from '../helpers/jwt';
 import { deleteUserAuthenticatorsList } from '../helpers/redis';
 import { ServiceData, StateChange, UserAuthenticatorUpdate } from '../types';
 import config from '../utils/config';
@@ -37,13 +38,15 @@ router.post('/userauthenticator/all', (req, res) => {
   if (userAuthenticatorUrls.length > 0) {
     config.redis.client.RPUSH(`urlShortener:${uei}:userAuthenticators`, userAuthenticatorUrls);
   }
+
+  getUserAuthenticatorPublicKey(uei);
   res.send('user authenticator list received');
 });
 
 router.post('/userauthenticator/update', (req, res) => {
-  const { userAuthenticatorUpdate }: { userAuthenticatorUpdate: UserAuthenticatorUpdate[] } = req.body;
+  const { serviceUpdate }: { serviceUpdate: UserAuthenticatorUpdate[] } = req.body;
 
-  if (!userAuthenticatorUpdate) {
+  if (!serviceUpdate) {
     return res.status(400).send('missing userAuthenticatorUpdate key');
   }
 
@@ -52,15 +55,13 @@ router.post('/userauthenticator/update', (req, res) => {
     return res.status(400).send('service error: unable to receive update');
   }
 
-  const userAuthenticatorUpdateOffline = userAuthenticatorUpdate.filter(
-    eachUpdate => eachUpdate.state === StateChange.offline
-  );
+  const userAuthenticatorUpdateOffline = serviceUpdate.filter(eachUpdate => eachUpdate.state === StateChange.offline);
 
   userAuthenticatorUpdateOffline.map(eachUpdatedOffline => {
     config.redis.client.LREM(`urlShortener:${uei}:userAuthenticators`, 0, eachUpdatedOffline.userAuthenticator.url);
   });
 
-  const userAuthenticatorUpdateOnlineUrls = userAuthenticatorUpdate
+  const userAuthenticatorUpdateOnlineUrls = serviceUpdate
     .filter(eachUpdate => eachUpdate.state === StateChange.online)
     .map(eachOnline => eachOnline.userAuthenticator.url);
 
@@ -68,6 +69,19 @@ router.post('/userauthenticator/update', (req, res) => {
     config.redis.client.RPUSH(`urlShortener:${uei}:userAuthenticators`, userAuthenticatorUpdateOnlineUrls);
   }
 
+  getUserAuthenticatorPublicKey(uei);
+
   res.send('user authenticator update received');
   console.log(req.body);
+});
+
+router.post('/loadbalancer', (req, res) => {
+  const { serviceUpdate }: { serviceUpdate: ServiceData } = req.body;
+  if (!serviceUpdate || serviceUpdate.name !== config.serviceNames.loadBalancer) {
+    return res.send('missing serviceUpdate key with load balancer info');
+  }
+
+  console.log('Url for load_balancer received: ', serviceUpdate.url);
+  process.env.LOAD_BALANCER_URL_ROOT = serviceUpdate.url;
+  res.send('update received');
 });

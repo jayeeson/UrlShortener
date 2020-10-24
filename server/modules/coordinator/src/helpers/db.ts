@@ -79,7 +79,7 @@ export function exitDb(pool: mysql.Pool): void {
   if (pool) {
     pool.end(err => {
       if (err) {
-        console.log(`error: ${err.message}`);
+        console.log(`error closing db connection: ${err.message}`);
       }
     });
     console.log('Closed the database connection');

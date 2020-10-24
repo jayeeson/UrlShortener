@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { DbOptions, ServiceData } from '../types';
 import { seedDB, createPoolAndHandleDisconnect } from '../helpers/db';
 import { getPort } from '../helpers/port';
+import { Algorithm } from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -53,11 +54,20 @@ async function connectPool() {
 }
 
 const redisClient = redis.createClient(redisPort, hostname);
-redisClient.on('connect', () => console.log('connected to redis on port ', redisPort));
-redisClient.on('error', err => console.log('Error connecting to redis', err));
+redisClient.on('connect', () => console.log('connected to redis on port', redisPort));
+redisClient.on('error', err => console.log('Error connecting to redis\n', err));
 
 const serviceNames = {
   userAuthenticator: 'user_authenticator',
+  loadBalancer: 'load_balancer',
+};
+
+const jwt = {
+  cookieName: 'auth-jwt',
+  guestCookie: 'guest-jwt',
+  verify: {
+    alg: 'RS256' as Algorithm,
+  },
 };
 
 const dbTrancheSize = 10000;
@@ -76,6 +86,7 @@ export default {
   serviceData,
   pool: connectPool(),
   serviceNames,
+  jwt,
   dbTrancheSize,
   exitSignals,
 };

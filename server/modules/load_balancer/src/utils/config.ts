@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 import dotenv from 'dotenv';
-import { DbOptions, ServiceData } from '../types';
+import { DbOptions, ServiceData, ServiceNames } from '../types';
 import { seedDB, createPoolAndHandleDisconnect } from '../helpers/db';
 import { getPort } from '../helpers/port';
 
@@ -45,8 +45,30 @@ async function connectPool() {
   return pool;
 }
 
-const serviceNames = {
+const serviceNames: ServiceNames = {
   urlShortener: 'url_shortener',
+  userAuthenticator: 'user_authenticator',
+  loadBalancer: 'load_balancer',
+};
+
+const routes = {
+  urlShortener: ['/new', '/userlinks', '/link/:id'],
+  userAuthenticator: [
+    '/register',
+    '/login',
+    '/logout',
+    '/deleteUser',
+    '/state',
+    '/jwt/key',
+    '/jwt/blacklisted',
+    '/jwt/guest',
+    '/jwt/status',
+  ],
+  loadBalancer: ['/serviceupdate', '/ping'],
+};
+
+const jwt = {
+  cookieName: 'auth-jwt',
 };
 
 const exitSignals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
@@ -58,5 +80,7 @@ export default {
   serviceData,
   pool: connectPool(),
   serviceNames,
+  routes,
+  jwt,
   exitSignals,
 };

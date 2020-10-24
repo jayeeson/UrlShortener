@@ -24,7 +24,7 @@ export async function clearExpiredTokensFromBlacklist(): Promise<void> {
     allRows.map(async row => {
       const { token } = row;
       try {
-        jwt.verify(token, config.secret) as DecodedToken;
+        jwt.verify(token, config.secret.publicKey) as DecodedToken;
       } catch (err) {
         await deleteTokenFromBlacklist(token);
       }
@@ -35,5 +35,13 @@ export async function clearExpiredTokensFromBlacklist(): Promise<void> {
 }
 
 export async function insertTokenInBlacklist(token: string): Promise<void> {
-  await sqlAlter<any>(await config.pool, 'INSERT INTO blacklist (token) VALUES (?)', [token]);
+  try {
+    await sqlAlter<any>(await config.pool, 'INSERT INTO blacklist (token) VALUES (?)', [token]);
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') {
+      //ok
+    } else {
+      throw err;
+    }
+  }
 }

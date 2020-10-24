@@ -12,7 +12,7 @@ async function insertNewRowForNewIp(req: Request) {
     const insertRow = await sqlAlter<OkPacket>(
       await config.pool,
       'INSERT INTO rate_limiter (ip, frequency, timestamp) VALUES (?,?,?)',
-      params,
+      params
     );
     if (insertRow.affectedRows > 0) {
       console.log('new ip hit /new, inserting new row');
@@ -40,11 +40,10 @@ async function rateLimitLogic(row: RateLimiterData, req: Request) {
     }
   } else {
     const params = [timeNow.format(), req.ip];
-    console.log(timestamp.format());
     await sqlAlter<any>(
       await config.pool,
       'UPDATE rate_limiter SET frequency = 1, timestamp = (?) WHERE ip = (?)',
-      params,
+      params
     );
   }
   return IsRequestAllowed.YES;
@@ -57,7 +56,7 @@ export async function rateLimiter(req: Request, res: Response, next: NextFunctio
     return;
   }
   const ipQuery = await sqlQuery<RateLimiterData>(await config.pool, 'SELECT * FROM rate_limiter WHERE ip = (?)', [ip]);
-  if (!ipQuery) {
+  if (!ipQuery.length) {
     insertNewRowForNewIp(req);
   } else {
     const status = await rateLimitLogic(ipQuery[0], req);
@@ -65,5 +64,11 @@ export async function rateLimiter(req: Request, res: Response, next: NextFunctio
       return res.status(429).send('Too many requests! Please wait a minute before retrying.');
     }
   }
+  next();
+}
+
+export function allowCORS(req: Request, res: Response, next: NextFunction): void {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 }

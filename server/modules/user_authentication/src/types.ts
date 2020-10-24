@@ -43,4 +43,5 @@ export interface DecodedToken {
 export enum AccountType {
   User = 'USER',
   Admin = 'ADMIN',
+  Guest = 'GUEST',
 }

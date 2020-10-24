@@ -42,7 +42,7 @@ export async function seedDB(dbOptions: DbOptions): Promise<void> {
         );`,
       `CREATE TABLE IF NOT EXISTS blacklist (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-          token VARCHAR(256) NOT NULL UNIQUE
+          token VARCHAR(512) NOT NULL UNIQUE
         );`,
     ];
 

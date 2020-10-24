@@ -14,7 +14,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'prettier/prettier': ['error', { singleQuote: true }],
-    quotes: ['error', 'single'],
+    // quotes: ['error', 'single'],
     semi: ['error', 'always'],
   },
 };

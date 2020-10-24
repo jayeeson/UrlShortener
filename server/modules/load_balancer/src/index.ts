@@ -1,18 +1,22 @@
 import express from 'express';
 import axios from 'axios';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 
 import { exitGracefullyOnSignals } from './helpers/exit';
 import { router as coordinatorRoutes } from './routes/coordinator';
 import { router as loadBalancerRoutes } from './routes/loadBalancer';
-import { rateLimiter } from './middleware';
+import { allowCORS, rateLimiter } from './middleware';
 import config from './utils/config';
 import { proxyHandler } from './routes/proxy';
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(rateLimiter);
+
+app.use(allowCORS);
 
 app.use(coordinatorRoutes);
 app.use(loadBalancerRoutes);

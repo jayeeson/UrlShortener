@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import axios from 'axios';
 import session from 'express-session';
+import cookieParser from 'cookie-parser';
 
 import config from './utils/config';
 import { router as coordinatorRoutes } from './routes/coordinator';
@@ -12,9 +13,10 @@ import { exitGracefullyOnSignals } from './helpers/exit';
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(
   session({
-    secret: config.secret,
+    secret: config.secret.publicKey.toString(),
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false },

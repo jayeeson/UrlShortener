@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import axios from 'axios';
+import cookieParser from 'cookie-parser';
+
 import { router as coordinatorRoutes } from './routes/coordinator';
 import { routes } from './routes/urlShortener';
 import { getHighestRange, getShortLinkRange } from './Counter';
@@ -10,6 +12,7 @@ import config from './utils/config';
 const app = express();
 app.use(express.static('views'));
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 (async () => {

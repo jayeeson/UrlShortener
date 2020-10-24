@@ -1,12 +1,13 @@
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { sqlQuery, sqlAlter } from '../helpers/db';
 import config from '../utils/config';
 import { getHashedPassword } from '../helpers/bcrypt';
-import { generateJwt, useTokenIfValid } from '../helpers/jwt';
+import { generateJwt, ifCookieTokenValidSendResponseString, useTokenIfValid } from '../helpers/jwt';
 import { isSignedIn } from '../middleware/users';
 import { queryUser, useRequestedAccountTypeIfAdmin } from '../helpers/sql/user';
-import { insertTokenInBlacklist } from '../helpers/sql/blacklist';
+import { insertTokenInBlacklist, isTokenBlacklisted } from '../helpers/sql/blacklist';
 import { User, AccountType } from '../types';
 
 export const router = express.Router();
@@ -48,10 +49,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.get('/login', (req, res) => {
-  res.send('Hit login page');
-});
-
 router.post('/login', async (req, res) => {
   const { username, password }: User = req.body;
 
@@ -62,16 +59,16 @@ router.post('/login', async (req, res) => {
   try {
     const user = await queryUser(username);
 
-    if (!user) {
+    if (!user.length) {
       return res.send(`Username ${username} does not exist`);
     }
 
     const correctPassword = await bcrypt.compare(password, user[0].password);
     if (correctPassword) {
       const token = generateJwt(username, user[0].accountType);
-      if (req.session) {
-        req.session.token = token;
-      }
+      res.cookie(config.jwt.cookieName, token, {
+        httpOnly: true,
+      });
     } else {
       return res.send('Incorrect password');
     }
@@ -83,22 +80,22 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/logout', async (req, res) => {
-  if (req.session) {
-    const { token } = req.session;
-    req.session.token = '';
-
+  const cookie = req.cookies[config.jwt.cookieName];
+  if (cookie) {
     try {
-      await insertTokenInBlacklist(token);
+      await insertTokenInBlacklist(cookie);
+      res.clearCookie(config.jwt.cookieName);
       res.send('Logged out');
     } catch (err) {
       res.send('Error logging out');
+      console.log(err);
     }
   }
 });
 
 router.get('/deleteUser', async (req, res) => {
-  if (req.session && req.session.token) {
-    const { token } = req.session;
+  const token = req.cookies[config.jwt.cookieName];
+  if (token) {
     const decoded = await useTokenIfValid(token);
     if (decoded) {
       const { username } = req.body;
@@ -123,6 +120,37 @@ router.get('/deleteUser', async (req, res) => {
   }
 });
 
-router.get('/stuff', isSignedIn, (req, res) => {
+///\todo: remove this route
+router.get('/state', isSignedIn, (req, res) => {
   res.send('hit stuff route');
+});
+
+router.get('/jwt/key', (req, res) => {
+  res.send(config.secret.publicKey.toString());
+});
+
+router.post('/jwt/blacklisted', async (req, res) => {
+  const isBlacklisted = await isTokenBlacklisted(req.body.token);
+  res.send(isBlacklisted);
+});
+
+router.get('/jwt/guest', async (req, res) => {
+  console.log('creating guest token');
+
+  const uuid = uuidv4();
+  const token = generateJwt(uuid, AccountType.Guest, '365d');
+  res.cookie(config.jwt.guestCookie, token, {
+    httpOnly: true,
+  });
+  res.send();
+});
+
+router.get('/jwt/status', async (req, res) => {
+  const userResponseSent = ifCookieTokenValidSendResponseString(req, res, config.jwt.cookieName, 'user token');
+  if (!userResponseSent) {
+    const guestResponseSent = ifCookieTokenValidSendResponseString(req, res, config.jwt.guestCookie, 'guest token');
+    if (!guestResponseSent) {
+      return res.status(200).send('no token');
+    }
+  }
 });

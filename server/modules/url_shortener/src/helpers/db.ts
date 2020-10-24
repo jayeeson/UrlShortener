@@ -32,7 +32,7 @@ export async function seedDB(dbOptions: DbOptions): Promise<void> {
       `CREATE DATABASE IF NOT EXISTS ${process.env.SERVICE_NAME};`,
       `USE ${process.env.SERVICE_NAME}`,
       `CREATE TABLE IF NOT EXISTS link (
-          user_id INT(9),
+          user_id VARCHAR(200) NOT NULL,
           short_link VARCHAR(8) NOT NULL UNIQUE,
           long_link VARCHAR(2083) NOT NULL
         );`,

@@ -1,5 +1,6 @@
 import { Response, NextFunction, Request } from 'express';
 import { isTokenValid } from '../helpers/jwt';
+import config from '../utils/config';
 
 function forbidAccess(res: Response) {
   res.send('Do not have required access');
@@ -7,7 +8,7 @@ function forbidAccess(res: Response) {
 }
 
 export async function isSignedIn(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const token = req.session?.token;
+  const token = req.cookies[config.jwt.cookieName];
 
   try {
     if (token && (await isTokenValid(token))) {
