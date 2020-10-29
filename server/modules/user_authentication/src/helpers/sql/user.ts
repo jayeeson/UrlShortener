@@ -12,7 +12,7 @@ export async function useRequestedAccountTypeIfAdmin(req: Request): Promise<Acco
   const { accountType }: User = req.body;
 
   if (accountType) {
-    const token = req.session?.token;
+    const token = req.cookies[config.jwt.cookieName];
     if (token && (await isTokenValid(token)) && isTokenOfAccountType(token, AccountType.Admin)) {
       return accountType;
     }

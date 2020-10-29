@@ -39,7 +39,7 @@ export async function insertTokenInBlacklist(token: string): Promise<void> {
     await sqlAlter<any>(await config.pool, 'INSERT INTO blacklist (token) VALUES (?)', [token]);
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
-      //ok
+      console.log('ER_DUP_ENTRY: duplicate blacklist token entry. Continuing.');
     } else {
       throw err;
     }

@@ -81,10 +81,14 @@ router.post('/login', async (req, res) => {
 
 router.get('/logout', async (req, res) => {
   const cookie = req.cookies[config.jwt.cookieName];
+
   if (cookie) {
     try {
       await insertTokenInBlacklist(cookie);
-      res.clearCookie(config.jwt.cookieName);
+      res.clearCookie(config.jwt.cookieName, {
+        httpOnly: true,
+      });
+
       res.send('Logged out');
     } catch (err) {
       res.send('Error logging out');

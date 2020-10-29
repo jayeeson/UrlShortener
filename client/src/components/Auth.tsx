@@ -1,28 +1,18 @@
 import React from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import LoggedInContext from '../contexts/LoggedIn';
-import { LoggedInStatus } from '../types';
+import { LoggedInStatus } from '../store/auth/types';
+import { RootState } from '../store/reducers';
+import { connect } from 'react-redux';
+import { logout } from '../store/auth/actions';
 
-class Auth extends React.Component {
-  static contextType = LoggedInContext;
-  context!: React.ContextType<typeof LoggedInContext>;
+interface IProps {
+  loginState: LoggedInStatus;
+  logout: () => Promise<void>;
+}
 
-  onLogoutClick = async (): Promise<void> => {
-    // logout on AUTH service (to blacklist) OK
-    // request deletion of LOGGED IN cookie OK
-    try {
-      await axios.get('/logout');
-      this.context.setStatus(LoggedInStatus.NoToken);
-      const { data } = await axios.get('/userlinks');
-      ///\todo: update userlinks. need links piece of state.
-    } catch (err) {
-      console.log('error logging out: OnLogoutClick', err);
-    }
-  };
-
+class Auth extends React.Component<IProps> {
   renderButton = (): JSX.Element => {
-    if (LoggedInStatus[this.context.status] === LoggedInStatus[LoggedInStatus.LoggedIn]) {
+    if (LoggedInStatus[this.props.loginState] === LoggedInStatus[LoggedInStatus.LoggedIn]) {
       return (
         <div className="right menu">
           {/*///\todo: fix the link*/}
@@ -35,7 +25,7 @@ class Auth extends React.Component {
             style={{
               marginLeft: '10px',
             }}
-            onClick={this.onLogoutClick}
+            onClick={() => this.props.logout()}
           >
             Logout
           </div>
@@ -59,4 +49,8 @@ class Auth extends React.Component {
   }
 }
 
-export default Auth;
+const mapStateToProps = (state: RootState) => {
+  return { loginState: state.auth.loginState };
+};
+
+export default connect(mapStateToProps, { logout })(Auth);

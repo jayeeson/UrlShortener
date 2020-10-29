@@ -6,7 +6,6 @@ import CreateLink from './CreateLink';
 import LinkList from './LinkList';
 
 class LinkShortener extends React.Component {
-  state: { links: CreatedLink[] } = { links: [] };
   componentDidMount = async (): Promise<void> => {
     const { data } = await axios.get('/userlinks');
     console.log(data);
@@ -19,11 +18,10 @@ class LinkShortener extends React.Component {
   };
 
   render(): JSX.Element {
-    const { links } = this.state;
     return (
       <div className="ui raised segments">
-        <CreateLink links={links} setLinks={this.setLinks} />
-        <LinkList links={links} setLinks={this.setLinks} />
+        <CreateLink />
+        <LinkList />
       </div>
     );
   }

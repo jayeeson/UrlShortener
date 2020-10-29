@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import axios from 'axios';
-import session from 'express-session';
 import cookieParser from 'cookie-parser';
 
 import config from './utils/config';
@@ -14,14 +13,6 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(
-  session({
-    secret: config.secret.publicKey.toString(),
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false },
-  })
-);
 
 app.use(coordinatorRoutes);
 app.use(userRoutes);

@@ -1,10 +1,13 @@
 import React from 'react';
-import { CreatedLink } from '../types';
+import { connect } from 'react-redux';
 import LinkItem from './LinkItem';
+import { deleteLink } from '../store/link/actions';
+import { RootState } from '../store/reducers';
+import { CreatedLink } from '../types';
 
 interface IProps {
   links: CreatedLink[];
-  setLinks: (links: CreatedLink[]) => void;
+  deleteLink: (shortLink: string) => Promise<void>;
 }
 
 class LinkList extends React.Component<IProps> {
@@ -14,22 +17,13 @@ class LinkList extends React.Component<IProps> {
     this.setState({ lastCopied: key });
   };
 
-  onDeleteLink = (linkToDelete: CreatedLink): void => {
-    const filteredLinks = this.props.links.filter(
-      link => link.short_link !== linkToDelete.short_link
-    );
-    this.props.setLinks(filteredLinks);
-  };
-
   renderList = (): JSX.Element | JSX.Element[] => {
     //map over links... create JSX LinkListItem for each.
-    const { links } = this.props;
-
-    if (!links.length) {
+    if (!this.props.links.length) {
       return <></>;
     }
 
-    return links
+    return this.props.links
       .map(link => {
         return (
           <LinkItem
@@ -37,7 +31,7 @@ class LinkList extends React.Component<IProps> {
             key={link.short_link}
             lastCopied={this.state.lastCopied}
             setLastCopied={this.setLastCopied}
-            onDeleteLink={this.onDeleteLink}
+            onDeleteLink={() => deleteLink(link.short_link)}
           />
         );
       })
@@ -49,4 +43,8 @@ class LinkList extends React.Component<IProps> {
   }
 }
 
-export default LinkList;
+const mapStateToProps = (state: RootState) => {
+  return { links: Object.values(state.links) };
+};
+
+export default connect(mapStateToProps, { deleteLink })(LinkList);

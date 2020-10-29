@@ -16,6 +16,7 @@ async function useAuthTokenOrGuestToken(req: Request, res: Response, next: NextF
       next();
     }
   } else {
+    ////todo: fix clear cookie
     res.clearCookie('set-cookie');
     res.send();
   }

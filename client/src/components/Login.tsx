@@ -1,15 +1,17 @@
-import loadBalancer from '../apis/loadBalancer';
-import history from '../history';
 import React, { useState } from 'react';
-import LoggedInContext from '../contexts/LoggedIn';
-import { LoggedInStatus } from '../types';
+import { connect } from 'react-redux';
+import { login } from '../store/auth/actions';
 
 interface LoginError {
   username?: string;
   password?: string;
 }
 
-const Login = (): JSX.Element => {
+const Login = ({
+  login,
+}: {
+  login: (username: string, password: string) => Promise<void>;
+}): JSX.Element => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<LoginError>({});
@@ -29,28 +31,13 @@ const Login = (): JSX.Element => {
     return errors;
   };
 
-  const onFormSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-    setStatus: (status: LoggedInStatus) => void
-  ) => {
+  const onFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const localErrors = validateSubmission();
     setErrors(localErrors);
 
     if (!(localErrors.username || localErrors.password)) {
-      try {
-        const response = await loadBalancer.post('/login', {
-          username,
-          password,
-        });
-
-        if (response.data === `Now logged in as ${username}`) {
-          setStatus(LoggedInStatus.LoggedIn);
-          history.push('/');
-        }
-      } catch (err) {
-        console.log(err);
-      }
+      login(username, password);
     }
   };
 
@@ -74,29 +61,20 @@ const Login = (): JSX.Element => {
   };
 
   return (
-    <LoggedInContext.Consumer>
-      {({ setStatus }) => (
-        <form
-          className="ui form error"
-          onSubmit={e => {
-            onFormSubmit(e, setStatus);
-          }}
-        >
-          <div className="field">
-            <label>Username</label>
-            <input type="text" onChange={e => onChange(e, setUsername)} value={username} />
-            {renderError('username')}
-          </div>
-          <div className="field">
-            <label>Password</label>
-            <input type="password" onChange={e => onChange(e, setPassword)} value={password} />
-            {renderError('password')}
-          </div>
-          <button className="ui submit button">Submit</button>
-        </form>
-      )}
-    </LoggedInContext.Consumer>
+    <form className="ui form error" onSubmit={onFormSubmit}>
+      <div className="field">
+        <label>Username</label>
+        <input type="text" onChange={e => onChange(e, setUsername)} value={username} />
+        {renderError('username')}
+      </div>
+      <div className="field">
+        <label>Password</label>
+        <input type="password" onChange={e => onChange(e, setPassword)} value={password} />
+        {renderError('password')}
+      </div>
+      <button className="ui submit button">Submit</button>
+    </form>
   );
 };
 
-export default Login;
+export default connect(null, { login })(Login);

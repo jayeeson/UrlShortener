@@ -1,35 +1,17 @@
 import React, { useState } from 'react';
-import loadBalancer from '../apis/loadBalancer';
-import { CreatedLink } from '../types';
+import { connect } from 'react-redux';
+import { addLink } from '../store/link/actions';
 import './css/CreateLink.css';
 
-const CreateLink = ({
-  links,
-  setLinks,
-}: {
-  links: CreatedLink[];
-  setLinks: (links: CreatedLink[]) => void;
-}): JSX.Element => {
+const CreateLink = ({ addLink }: { addLink: (longLink: string) => Promise<void> }): JSX.Element => {
   const [linkTerm, setLinkTerm] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('submitting');
     if (linkTerm) {
-      try {
-        const { data } = await loadBalancer.post('/new', {
-          url: linkTerm,
-        });
-
-        const newLink: CreatedLink = { short_link: data, long_link: linkTerm };
-        const linksWithNewLink = [...links, newLink];
-        setLinks(linksWithNewLink);
-        setLinkTerm('');
-
-        console.log(data);
-      } catch (err) {
-        console.log(err);
-      }
+      addLink(linkTerm);
+      setLinkTerm('');
     }
   };
 
@@ -60,4 +42,4 @@ const CreateLink = ({
   );
 };
 
-export default CreateLink;
+export default connect(null, { addLink })(CreateLink);

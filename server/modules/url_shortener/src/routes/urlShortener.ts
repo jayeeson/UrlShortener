@@ -80,6 +80,7 @@ export const routes = (minMaxRange: { min: number; max: number }): Router => {
   });
 
   router.delete('/link/:id', async (req, res) => {
+    ///\todo: add middleware to ensure only creator of link can delete
     console.log('hit delete route');
 
     const shortLink = req.params.id;
@@ -96,15 +97,13 @@ export const routes = (minMaxRange: { min: number; max: number }): Router => {
   });
 
   router.get('/userlinks', async (req, res) => {
-    console.log('start of userlinks route');
-
     const token = req.cookies[config.jwt.cookieName] || req.cookies[config.jwt.guestCookie];
     const blacklisted = await isTokenBlacklisted(token);
     if (!blacklisted) {
       const decoded = verifyToken(token);
       if (decoded) {
         try {
-          const links = await sqlQuery<any>(
+          const links = await sqlQuery<{ short_link: string; long_link: string }>(
             await config.pool,
             'SELECT short_link, long_link FROM link WHERE user_id = (?)',
             [decoded.username]
