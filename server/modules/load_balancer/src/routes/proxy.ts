@@ -9,9 +9,6 @@ const index = {
   userAuthenticator: 0,
 };
 
-let numberRouteResponses = 0;
-let numberErrors = 0;
-
 const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, service: keyof typeof index) => {
   if (index[service] + 1 > serviceUrls[service].length) {
     index[service] = 0;
@@ -26,9 +23,6 @@ const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, servi
       headers: req.headers,
     });
 
-    if (routeResponse) numberRouteResponses++;
-    console.log('number of times routeResponse hit: ', numberRouteResponses, 'now hitting:', routeResponse.config.url);
-
     const proxyCookie = routeResponse.headers['set-cookie'];
 
     if (proxyCookie) {
@@ -39,9 +33,6 @@ const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, servi
     const axiosError = err as AxiosError;
     // 304 Not Modified
     if (axiosError.response?.status === 304) {
-      numberRouteResponses++;
-      console.log('number of times routeResponse hit: ', numberRouteResponses, 'now hitting:', axiosError.config.url);
-      console.log(axiosError.response.data);
       axiosError.response.headers['set-cookie'];
       const proxyCookie = axiosError.response.headers['set-cookie'];
 
@@ -50,17 +41,6 @@ const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, servi
       }
       return res.status(304).send('previous value');
     }
-    numberErrors++;
-    console.log(
-      'number of errors caught',
-      numberErrors,
-      'route:',
-      axiosError.response?.config.url,
-      'isaxioserror:',
-      axiosError.isAxiosError,
-      'message:',
-      axiosError.message
-    );
     res.send(`error proxying request to ${req.url}`);
     console.log(err);
   }

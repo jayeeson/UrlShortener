@@ -10,7 +10,6 @@ export async function sendServiceUpdateToLoadBalancer(pool: mysql.Pool): Promise
     const loadBalancer = activeServices.find(service => service.name === ServiceNames.loadBalancer);
     if (loadBalancer) {
       axios.post(`${loadBalancer.url}/serviceupdate`, { services: activeServices }).catch(err => console.log(err));
-      console.log('Service update sent to load balancer');
     }
   } catch (err) {
     console.log(err);
@@ -27,7 +26,6 @@ export async function sendUserAuthenticatorsToUrlShortener(pool: mysql.Pool, url
         .post(`${urlShortener.url}/userauthenticator/all`, { userAuthenticators: userAuthenticators })
         .catch(err => console.log(err));
     }
-    console.log('All active user authenticators sent to url Shortener');
   } catch (err) {
     console.log(err);
   }
@@ -39,7 +37,6 @@ export async function sendUserAuthenticatorUpdateToUrlShorteners(
 ): Promise<void> {
   try {
     genericSendServiceToAllUrlShorteners(pool, userAuthenticatorUpdate, '/userauthenticator/update');
-    console.log('Update to user authenticator sent to all url Shorteners');
   } catch (err) {
     console.log(err);
   }

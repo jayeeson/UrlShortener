@@ -11,6 +11,7 @@ import { insertTokenInBlacklist, isTokenBlacklisted } from '../helpers/sql/black
 import { User, AccountType } from '../types';
 
 export const router = express.Router();
+const oneYearInMs = 31.536e9;
 
 router.get('/', (req, res) => {
   res.send('Hit the main page of user_authentication');
@@ -67,6 +68,7 @@ router.post('/login', async (req, res) => {
     if (correctPassword) {
       const token = generateJwt(username, user[0].accountType);
       res.cookie(config.jwt.cookieName, token, {
+        maxAge: oneYearInMs,
         httpOnly: true,
       });
     } else {
@@ -86,6 +88,7 @@ router.get('/logout', async (req, res) => {
     try {
       await insertTokenInBlacklist(cookie);
       res.clearCookie(config.jwt.cookieName, {
+        maxAge: oneYearInMs,
         httpOnly: true,
       });
 
@@ -139,11 +142,10 @@ router.post('/jwt/blacklisted', async (req, res) => {
 });
 
 router.get('/jwt/guest', async (req, res) => {
-  console.log('creating guest token');
-
   const uuid = uuidv4();
   const token = generateJwt(uuid, AccountType.Guest, '365d');
   res.cookie(config.jwt.guestCookie, token, {
+    maxAge: oneYearInMs,
     httpOnly: true,
   });
   res.send();

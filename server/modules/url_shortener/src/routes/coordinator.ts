@@ -72,7 +72,6 @@ router.post('/userauthenticator/update', (req, res) => {
   getUserAuthenticatorPublicKey(uei);
 
   res.send('user authenticator update received');
-  console.log(req.body);
 });
 
 router.post('/loadbalancer', (req, res) => {
@@ -81,7 +80,6 @@ router.post('/loadbalancer', (req, res) => {
     return res.send('missing serviceUpdate key with load balancer info');
   }
 
-  console.log('Url for load_balancer received: ', serviceUpdate.url);
   process.env.LOAD_BALANCER_URL_ROOT = serviceUpdate.url;
-  res.send('update received');
+  res.send('load balancer url update received');
 });
