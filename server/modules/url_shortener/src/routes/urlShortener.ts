@@ -71,9 +71,7 @@ export const routes = (minMaxRange: { min: number; max: number }): Router => {
       if (url.substr(0, 4) != 'http') {
         url = 'http://'.concat(url);
       }
-      // res.send(url);
-      res.writeHead(301, { Location: url });
-      res.end();
+      res.send(url);
     } else {
       res.status(404).send('error getting link');
     }

@@ -14,7 +14,7 @@ const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, servi
     index[service] = 0;
   }
 
-  console.log('proxying to', service);
+  // console.log('proxying', req.url, 'to', service);
   try {
     const routeResponse = await axios({
       method: req.method as Method,
@@ -64,8 +64,6 @@ const pathBelongsToService = (req: Request, service: keyof ServiceUrls) => {
 };
 
 export async function proxyHandler(req: Request, res: Response): Promise<void> {
-  console.log('trying to route request to url', req.url);
-
   if (pathBelongsToService(req, 'loadBalancer')) {
     return;
   } else if (pathBelongsToService(req, 'urlShortener')) {

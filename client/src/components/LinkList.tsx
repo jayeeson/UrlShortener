@@ -31,7 +31,7 @@ class LinkList extends React.Component<IProps> {
             key={link.short_link}
             lastCopied={this.state.lastCopied}
             setLastCopied={this.setLastCopied}
-            onDeleteLink={() => deleteLink(link.short_link)}
+            onDeleteLink={() => this.props.deleteLink(link.short_link)}
           />
         );
       })

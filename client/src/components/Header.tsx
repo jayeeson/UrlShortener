@@ -8,9 +8,6 @@ const Header = (): JSX.Element => {
       <Link className="active item" to="/">
         Short Links
       </Link>
-      <Link className="item" to="/">
-        About
-      </Link>
       <Auth />
     </div>
   );

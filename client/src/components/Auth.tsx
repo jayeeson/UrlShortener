@@ -39,6 +39,9 @@ class Auth extends React.Component<IProps> {
           <Link className="ui button" style={{ marginLeft: '10px' }} to="/login">
             Login
           </Link>
+          <Link className="ui button" style={{ marginLeft: '10px' }} to="/register">
+            Register
+          </Link>
         </div>
       );
     }

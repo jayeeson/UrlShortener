@@ -1,4 +1,8 @@
 .backlayer {
-  background-color: #99e1ec;
   display: flex;
+  border-radius: 10px;
+}
+
+img {
+  border-radius: 3%;
 }

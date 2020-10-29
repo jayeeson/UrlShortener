@@ -36,7 +36,7 @@ router.post('/register', async (req, res) => {
     await sqlAlter<any>(await config.pool, 'INSERT INTO user (username, password, accountType) VALUES (?,?,?)', params);
 
     console.log(`user ${username} created`);
-    res.send('User created. Please login.');
+    res.send('User created.');
   } catch (err) {
     console.log(err);
     let message = '';

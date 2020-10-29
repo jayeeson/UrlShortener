@@ -6,6 +6,8 @@ import Display from './Display';
 import Footer from './Footer';
 import Login from './Login';
 import Redirect from '../components/Redirect';
+import Register from './Register';
+import PageNotFound from './PageNotFound';
 import { CreatedLink } from '../types';
 import { connect } from 'react-redux';
 import { checkState } from '../store/auth/actions';
@@ -28,7 +30,9 @@ class App extends React.Component<IProps> {
           <Header />
           <Switch>
             <Route path="/" exact component={Display}></Route>
+            <Route path="/pagenotfound" exact component={PageNotFound}></Route>
             <Route path="/login" exact component={Login}></Route>
+            <Route path="/register" exact component={Register}></Route>
             <Route path="/:id" exact component={Redirect}></Route>
           </Switch>
           <Footer />
