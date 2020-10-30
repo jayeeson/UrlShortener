@@ -5,20 +5,21 @@ import config from './utils/config';
 async function useAuthTokenOrGuestToken(req: Request, res: Response, next: NextFunction): Promise<void> {
   const token = req.cookies[config.jwt.cookieName];
   const guestToken = req.cookies[config.jwt.guestCookie];
-  if (token) {
-    const blacklisted = await isTokenBlacklisted(token);
-    if (!blacklisted) {
-      next();
+  try {
+    if (token) {
+      const blacklisted = await isTokenBlacklisted(token);
+      if (!blacklisted) {
+        return next();
+      }
+    } else if (guestToken) {
+      const blacklisted = await isTokenBlacklisted(token);
+      if (!blacklisted) {
+        return next();
+      }
     }
-  } else if (guestToken) {
-    const blacklisted = await isTokenBlacklisted(token);
-    if (!blacklisted) {
-      next();
-    }
-  } else {
-    ////todo: fix clear cookie
-    res.clearCookie('set-cookie');
-    res.send();
+    res.status(401).end();
+  } catch {
+    res.status(401).end();
   }
 }
 

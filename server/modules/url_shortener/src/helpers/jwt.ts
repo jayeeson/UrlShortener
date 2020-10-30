@@ -1,7 +1,7 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config';
-import { DecodedToken } from '../types';
+import { DecodedToken, ServiceData } from '../types';
 
 export async function isTokenBlacklisted(token: string): Promise<boolean> {
   if (!process.env.LOAD_BALANCER_URL_ROOT) {
@@ -10,7 +10,6 @@ export async function isTokenBlacklisted(token: string): Promise<boolean> {
   }
   try {
     const response = await axios.post(`${process.env.LOAD_BALANCER_URL_ROOT}/jwt/blacklisted`, { token });
-
     if (response.data === false) {
       return false;
     }
@@ -20,24 +19,34 @@ export async function isTokenBlacklisted(token: string): Promise<boolean> {
   }
 }
 
-export function getUserAuthenticatorPublicKey(uei: string): void {
-  config.redis.client.LRANGE(`urlShortener:${uei}:userAuthenticators`, 0, 0, async (err, val) => {
-    if (!process.env.USER_AUTH_JWT_KEY && val.length > 0) {
-      try {
-        const { data } = await axios.get(`${val[0]}/jwt/key`);
-        if (data) {
-          process.env.USER_AUTH_JWT_KEY = data;
-        }
-      } catch (err) {
-        console.log(err);
+export async function getUserAuthenticatorPublicKey(): Promise<string | undefined> {
+  try {
+    const { data }: { data: { services: { [index: number]: ServiceData } } } = await axios.get(
+      `${process.env.COORDINATOR_URL_ROOT}/getservices/${config.serviceNames.userAuthenticator}`
+    );
+
+    const services = Object.values(data.services);
+    if (services.length) {
+      if (data) {
+        const authHost = services[0].url;
+        const response = await axios.get(`${authHost}/jwt/key`);
+        process.env.USER_AUTH_JWT_KEY = response.data;
+        return response.data;
       }
     }
-  });
+    return undefined;
+  } catch {
+    return undefined;
+  }
 }
 
-export function verifyToken(token: string): DecodedToken | undefined {
-  const key = process.env.USER_AUTH_JWT_KEY;
-  if (!key || !token) {
+export async function verifyToken(token: string): Promise<DecodedToken | undefined> {
+  if (!token) {
+    return undefined;
+  }
+
+  const key = process.env.USER_AUTH_JWT_KEY || (await getUserAuthenticatorPublicKey());
+  if (!key) {
     return undefined;
   }
 

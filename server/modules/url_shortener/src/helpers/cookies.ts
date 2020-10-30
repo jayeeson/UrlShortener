@@ -15,10 +15,10 @@ export function getAuthOrGuestCookie(req: Request): string | undefined {
   return undefined;
 }
 
-export function getUsernameFromCookie(req: Request): string | undefined {
+export async function getUsernameFromCookie(req: Request): Promise<string | undefined> {
   const cookie = getAuthOrGuestCookie(req);
   if (cookie) {
-    const decoded = verifyToken(cookie);
+    const decoded = await verifyToken(cookie);
     if (decoded) {
       return decoded.username;
     }

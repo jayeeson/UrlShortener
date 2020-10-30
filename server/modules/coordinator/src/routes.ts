@@ -1,16 +1,12 @@
 import express, { Router } from 'express';
 import mysql, { OkPacket } from 'mysql';
-import { ServiceData, ServiceNames, StateChange } from './types';
+import { ServiceData, ServiceNames } from './types';
 import { sqlQuery, sqlAlter } from './helpers/db';
 import {
   sendLoadBalancerToAllUrlShorteners,
   sendLoadBalancerToUrlShortener,
   sendServiceUpdateToLoadBalancer,
-  sendUei,
-  sendUserAuthenticatorsToUrlShortener,
-  sendUserAuthenticatorUpdateToUrlShorteners,
 } from './helpers/axios';
-import config from './utils/config';
 import { hasServiceData } from './middleware/validators';
 
 const router = express.Router();
@@ -19,9 +15,9 @@ export const routes = (pool: mysql.Pool): Router => {
     res.send('Hit the coordinator root url');
   });
 
-  router.get('/getservices', async (req, res) => {
+  router.get('/getservices/:service', async (req, res) => {
     console.log(req.body);
-    const { service } = req.body;
+    const { service } = req.params;
     try {
       const queryResponse =
         service === undefined
@@ -51,12 +47,7 @@ export const routes = (pool: mysql.Pool): Router => {
       if (queryResponse.affectedRows > 0) {
         sendServiceUpdateToLoadBalancer(pool);
         if (serviceData.name === ServiceNames.urlShortener) {
-          await sendUei(serviceData, queryResponse.insertId);
-          sendUserAuthenticatorsToUrlShortener(pool, serviceData);
           sendLoadBalancerToUrlShortener(pool, serviceData);
-        } else if (serviceData.name === ServiceNames.userAuthenticator) {
-          const userAuthenticatorUpdate = [{ userAuthenticator: serviceData, state: StateChange.online }];
-          sendUserAuthenticatorUpdateToUrlShorteners(pool, userAuthenticatorUpdate);
         } else if (serviceData.name === ServiceNames.loadBalancer) {
           sendLoadBalancerToAllUrlShorteners(pool, serviceData);
         }
@@ -82,13 +73,9 @@ export const routes = (pool: mysql.Pool): Router => {
     console.log(`Exit notification received from service:\n  ${JSON.stringify(req.body)}`);
     const params = [serviceData.name, serviceData.url];
     try {
-      await sqlQuery<any>(pool, 'DELETE FROM service WHERE name = ? AND url = ? ', params);
+      await sqlAlter<any>(pool, 'DELETE FROM service WHERE name = ? AND url = ? ', params);
 
       sendServiceUpdateToLoadBalancer(pool);
-      if (serviceData.name === ServiceNames.userAuthenticator) {
-        const userAuthenticatorUpdate = [{ userAuthenticator: serviceData, state: StateChange.offline }];
-        sendUserAuthenticatorUpdateToUrlShorteners(await config.pool, userAuthenticatorUpdate);
-      }
       res.send('deletion request received and acted upon');
     } catch (err) {
       console.log(err);

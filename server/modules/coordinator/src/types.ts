@@ -11,18 +11,8 @@ export interface DbOptions {
   database?: string;
 }
 
-export interface UserAuthenticatorUpdate {
-  userAuthenticator: ServiceData;
-  state: StateChange;
-}
-
 export enum ServiceNames {
   urlShortener = 'url_shortener',
   loadBalancer = 'load_balancer',
   userAuthenticator = 'user_authenticator',
-}
-
-export enum StateChange {
-  offline = 0,
-  online = 1,
 }

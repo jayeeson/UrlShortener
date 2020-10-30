@@ -10,11 +10,16 @@ const index = {
 };
 
 const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, service: keyof typeof index) => {
+  if (serviceUrls[service].length === 0) {
+    console.log(`server error: no service of type ${service} is running to handle request to ${req.url}`);
+    return res.status(400).send(`server error: no service of type ${service} is running to handle your request`);
+  }
+
   if (index[service] + 1 > serviceUrls[service].length) {
     index[service] = 0;
   }
 
-  // console.log('proxying', req.url, 'to', service);
+  console.log('proxying', req.url, 'to', service);
   try {
     const routeResponse = await axios({
       method: req.method as Method,
@@ -41,7 +46,7 @@ const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, servi
       }
       return res.status(304).send('previous value');
     }
-    res.send(`error proxying request to ${req.url}`);
+    res.status(400).send(`error proxying request to ${req.url}`);
     console.log(err);
   }
 

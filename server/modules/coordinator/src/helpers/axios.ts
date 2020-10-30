@@ -1,7 +1,7 @@
 import mysql from 'mysql';
 import axios from 'axios';
 import { queryActiveServices } from './sql';
-import { ServiceNames, UserAuthenticatorUpdate } from '../types';
+import { ServiceNames } from '../types';
 import { ServiceData } from '../types';
 
 export async function sendServiceUpdateToLoadBalancer(pool: mysql.Pool): Promise<void> {
@@ -15,37 +15,6 @@ export async function sendServiceUpdateToLoadBalancer(pool: mysql.Pool): Promise
     console.log(err);
   }
 }
-
-export async function sendUserAuthenticatorsToUrlShortener(pool: mysql.Pool, urlShortener: ServiceData): Promise<void> {
-  try {
-    const activeServices = await queryActiveServices(pool);
-    const userAuthenticators = activeServices.filter(service => service.name === ServiceNames.userAuthenticator);
-
-    if (userAuthenticators.length > 0) {
-      axios
-        .post(`${urlShortener.url}/userauthenticator/all`, { userAuthenticators: userAuthenticators })
-        .catch(err => console.log(err));
-    }
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-export async function sendUserAuthenticatorUpdateToUrlShorteners(
-  pool: mysql.Pool,
-  userAuthenticatorUpdate: UserAuthenticatorUpdate[]
-): Promise<void> {
-  try {
-    genericSendServiceToAllUrlShorteners(pool, userAuthenticatorUpdate, '/userauthenticator/update');
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-export async function sendUei(serviceData: ServiceData, uei: number): Promise<void> {
-  await axios.post(`${serviceData.url}/uei`, { uei });
-}
-
 export async function getExpiredServices(services: ServiceData[]): Promise<(ServiceData | null)[]> {
   return Promise.all(
     services.map(async service => {
@@ -87,7 +56,7 @@ export async function sendLoadBalancerToAllUrlShorteners(
 
 export async function genericSendServiceToAllUrlShorteners(
   pool: mysql.Pool,
-  update: ServiceData | UserAuthenticatorUpdate[],
+  update: ServiceData,
   route: string
 ): Promise<void> {
   try {

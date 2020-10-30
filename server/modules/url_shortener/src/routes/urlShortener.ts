@@ -37,6 +37,8 @@ export const routes = (minMaxRange: { min: number; max: number }): Router => {
 
   router.post('/new', mw.useAuthTokenOrGuestToken, async (req, res) => {
     try {
+      console.log('hit /new');
+
       // validate user input: need a long link.
       const { url } = req.body;
       if (!url) {
@@ -44,13 +46,13 @@ export const routes = (minMaxRange: { min: number; max: number }): Router => {
       }
       const urlRegex = /(https?:\/\/(www\.)?)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/gi;
       if (url.match(urlRegex)) {
-        const username = getUsernameFromCookie(req);
+        const username = await getUsernameFromCookie(req);
         const nextIdWithEntropy = Math.floor((nextId + Math.random()) * 10);
-        console.log(`id before encoding = ${nextIdWithEntropy}`);
         const shortLink = (base62.encode(nextIdWithEntropy) as string).padStart(8, '0');
         storeLinkInDb(await config.pool, shortLink, url, username ?? '0');
         nextId += 1;
         ({ nextId, min, max } = await manageReservedRange(nextId, min, max));
+        console.log('created new shortlink', shortLink);
         res.send(shortLink);
       } else {
         res.send('invalid url');
@@ -98,7 +100,7 @@ export const routes = (minMaxRange: { min: number; max: number }): Router => {
     const token = req.cookies[config.jwt.cookieName] || req.cookies[config.jwt.guestCookie];
     const blacklisted = await isTokenBlacklisted(token);
     if (!blacklisted) {
-      const decoded = verifyToken(token);
+      const decoded = await verifyToken(token);
       if (decoded) {
         try {
           const links = await sqlQuery<{ short_link: string; long_link: string }>(

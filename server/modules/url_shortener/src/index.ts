@@ -8,6 +8,7 @@ import { routes } from './routes/urlShortener';
 import { getHighestRange, getShortLinkRange } from './Counter';
 import { exitGracefullyOnSignals } from './helpers/exit';
 import config from './utils/config';
+import { getUserAuthenticatorPublicKey } from './helpers/jwt';
 
 const app = express();
 app.use(express.static('views'));
@@ -23,18 +24,23 @@ app.set('view engine', 'ejs');
 
   app.use(coordinatorRoutes);
   app.use(routes(startingMinMaxRange));
-  const server = app.listen(config.port, config.hostname, () => {
-    console.log(`Running server on port ${config.port}!!`);
-    axios
-      .post(`${config.coordinatorUrl}/startnotification/`, { serviceData: config.serviceData })
-      .then(response =>
-        console.log(
-          `Start Notification response received from Coordinator:\n  status: ${response.status}\n  response data: ${response.data}`
-        )
-      )
-      .catch(err => {
-        console.log(err);
+  const server = app.listen(config.port, config.hostname, async () => {
+    console.log('Running server on port', config.port);
+    try {
+      const startResponse = await axios.post(`${config.coordinatorUrl}/startnotification/`, {
+        serviceData: config.serviceData,
       });
+      console.log(
+        'Start Notification response received from Coordinator:\n',
+        `  status: ${startResponse.status}\n  response data: ${startResponse.data}`
+      );
+
+      if (!process.env.USER_AUTH_JWT_KEY) {
+        getUserAuthenticatorPublicKey();
+      }
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   exitGracefullyOnSignals(config.exitSignals, server);
