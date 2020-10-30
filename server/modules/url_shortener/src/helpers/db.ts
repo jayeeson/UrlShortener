@@ -33,6 +33,7 @@ export async function seedDB(dbOptions: DbOptions): Promise<void> {
       `USE ${process.env.SERVICE_NAME}`,
       `CREATE TABLE IF NOT EXISTS link (
           user_id VARCHAR(200) NOT NULL,
+          unencoded_id_no_entropy INT(14) NOT NULL UNIQUE,
           short_link VARCHAR(8) NOT NULL UNIQUE,
           long_link VARCHAR(2083) NOT NULL
         );`,
@@ -40,9 +41,6 @@ export async function seedDB(dbOptions: DbOptions): Promise<void> {
           short_link VARCHAR(8) NOT NULL UNIQUE,
           expiry DATE NOT NULL,
           count INT(9)
-        );`,
-      `CREATE TABLE IF NOT EXISTS counter (
-          highest_unused_id INT(11) NOT NULL
         );`,
     ];
 

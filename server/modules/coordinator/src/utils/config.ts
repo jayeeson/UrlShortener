@@ -38,11 +38,14 @@ async function connectPool() {
   return pool;
 }
 
+const shortlinkTrancheSize = 10000;
+
 const exitSignals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 
 export default {
   hostname,
   port,
   pool: connectPool(),
+  shortlinkTrancheSize,
   exitSignals,
 };

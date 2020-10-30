@@ -94,7 +94,7 @@ router.get('/logout', async (req, res) => {
 
       res.send('Logged out');
     } catch (err) {
-      res.send('Error logging out');
+      res.status(400).send('Error logging out');
       console.log(err);
     }
   }
@@ -119,7 +119,7 @@ router.get('/deleteUser', async (req, res) => {
         res.send(`User ${username} deleted`);
       } catch (err) {
         console.log(err);
-        res.send('Could not delete user');
+        res.status(400).send('Could not delete user');
       }
     }
   } else {
@@ -156,7 +156,7 @@ router.get('/jwt/status', async (req, res) => {
   if (!userResponseSent) {
     const guestResponseSent = ifCookieTokenValidSendResponseString(req, res, config.jwt.guestCookie, 'guest token');
     if (!guestResponseSent) {
-      return res.status(200).send('no token');
+      return res.send('no token');
     }
   }
 });

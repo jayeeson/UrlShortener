@@ -70,3 +70,39 @@ export async function genericSendServiceToAllUrlShorteners(
     console.log(err);
   }
 }
+
+export async function requestLargestReservedIdFromAllActiveUrlShorteners(
+  pool: mysql.Pool
+): Promise<number | undefined> {
+  try {
+    const activeServices = await queryActiveServices(pool);
+    const urlShorteners = activeServices.filter(service => service.name === ServiceNames.urlShortener);
+
+    const highestReservedIdArray = await Promise.all(
+      urlShorteners.map(async urlShortener => {
+        const { data }: { data: string } = await axios.get(`${urlShortener.url}/highestactivereservedshortlink`);
+        return data === 'undefined' ? undefined : parseInt(data, 10);
+      })
+    );
+    const highestReservedId = highestReservedIdArray.reduce((acc, cur) => {
+      if (cur === undefined) return acc;
+      if (acc === undefined) return cur;
+      return cur > acc ? cur : acc;
+    });
+
+    return highestReservedId;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function requestLargestReservedIdFromUrlShortenerDatabase(
+  urlShortenerUrl: string
+): Promise<number | undefined> {
+  try {
+    const { data }: { data: string } = await axios.get(`${urlShortenerUrl}/highestreservedshortlinkindb`);
+    return data === 'undefined' ? undefined : parseInt(data, 10);
+  } catch {
+    return undefined;
+  }
+}

@@ -1,7 +1,5 @@
 import React from 'react';
-import axios from 'axios';
 
-import { CreatedLink } from '../types';
 import { getLinks } from '../store/link/actions';
 import CreateLink from './CreateLink';
 import LinkList from './LinkList';

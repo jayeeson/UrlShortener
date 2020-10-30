@@ -70,7 +70,6 @@ const jwt = {
   },
 };
 
-const dbTrancheSize = 10000;
 const exitSignals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 
 export default {
@@ -87,6 +86,5 @@ export default {
   pool: connectPool(),
   serviceNames,
   jwt,
-  dbTrancheSize,
   exitSignals,
 };

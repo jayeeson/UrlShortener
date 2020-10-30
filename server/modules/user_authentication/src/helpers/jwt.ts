@@ -57,7 +57,7 @@ export function ifCookieTokenValidSendResponseString(
   if (token) {
     const valid = isTokenValid(token);
     if (valid) {
-      return res.status(200).send(responseStr);
+      return res.send(responseStr);
     } else {
       res.clearCookie(cookieName);
     }
