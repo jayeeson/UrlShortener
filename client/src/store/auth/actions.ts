@@ -1,8 +1,10 @@
-import { Dispatch } from 'react';
 import loadBalancer from '../../apis/loadBalancer';
 import history from '../../history';
-import { AuthActionTypes, AuthAction, LoggedInStatus } from './types';
+import { AuthActionTypes, LoggedInStatus, AuthState } from './types';
 import { getLinks } from '../link/actions';
+import { setFailedAuthError } from '../errors/actions';
+import { ThunkDispatch } from 'redux-thunk';
+import { Action } from 'redux';
 
 enum LoggedInResponses {
   LoggedIn = 'user token',
@@ -17,7 +19,8 @@ enum RegisterResponses {
 }
 
 export const login = (username: string, password: string) => async (
-  dispatch: Dispatch<AuthAction | ReturnType<typeof getLinks>>
+  // dispatch: Dispatch<AuthAction | ReturnType<typeof getLinks>>
+  dispatch: ThunkDispatch<AuthState, void, Action>
 ): Promise<void> => {
   const response = await loadBalancer.post('/login', {
     username,
@@ -33,15 +36,12 @@ export const login = (username: string, password: string) => async (
     dispatch(getLinks());
     history.push('/');
   } else {
-    dispatch({
-      type: AuthActionTypes.FAILED_AUTH,
-      payload: { failed: true, message: 'Login failed: incorrect username / password' },
-    });
+    dispatch(setFailedAuthError('Login failed: incorrect username / password'));
   }
 };
 
 export const logout = () => async (
-  dispatch: Dispatch<AuthAction | ReturnType<typeof getLinks>>
+  dispatch: ThunkDispatch<AuthState, void, Action>
 ): Promise<void> => {
   const response = await loadBalancer.get('/logout');
   console.log(response.data);
@@ -62,7 +62,7 @@ export const logout = () => async (
 };
 
 export const checkState = () => async (
-  dispatch: Dispatch<AuthAction | ReturnType<typeof getLinks>>
+  dispatch: ThunkDispatch<AuthState, void, Action>
 ): Promise<void> => {
   const { data } = await loadBalancer.get('/jwt/status');
 
@@ -89,40 +89,15 @@ export const checkState = () => async (
 };
 
 export const register = (username: string, password: string) => async (
-  dispatch: Dispatch<
-    AuthAction | ((dispatch: Dispatch<AuthAction | ReturnType<typeof getLinks>>) => Promise<void>)
-  >
+  dispatch: ThunkDispatch<AuthState, void, Action>
 ): Promise<void> => {
   const { data } = await loadBalancer.post('/register', { username, password });
-  console.log('data:', data);
 
   if (data === RegisterResponses.Success) {
     dispatch(login(username, password));
   } else if (data === RegisterResponses.UsernameAlreadyTaken) {
-    dispatch({
-      type: AuthActionTypes.FAILED_AUTH,
-      payload: {
-        failed: true,
-        message: 'That username already exists. Please register another username.',
-      },
-    });
+    dispatch(setFailedAuthError('That username already exists. Please register another username.'));
   } else if (data === RegisterResponses.UnknownFailure) {
-    dispatch({
-      type: AuthActionTypes.FAILED_AUTH,
-      payload: {
-        failed: true,
-        message: 'Registration failed for unknown reason',
-      },
-    });
+    dispatch(setFailedAuthError('Registration failed for unknown reason'));
   }
-};
-
-export const clearAuthFailure = (): AuthAction => {
-  return {
-    type: AuthActionTypes.CLEAR_FAILED_AUTH,
-    payload: {
-      failed: false,
-      message: '',
-    },
-  };
 };

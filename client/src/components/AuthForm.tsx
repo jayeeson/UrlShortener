@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { AuthAction, AuthFailure } from '../store/auth/types';
 import { RootState } from '../store/reducers';
-import { clearAuthFailure } from '../store/auth/actions';
+import { clearFailedAuthError } from '../store/errors/actions';
+import { ErrorsAction, ServerError } from '../store/errors/types';
 
 interface ValidationError {
   username?: string;
@@ -12,19 +12,19 @@ interface ValidationError {
 const AuthForm = ({
   onSubmit,
   authFailure,
-  clearAuthFailure,
+  clearFailedAuthError,
 }: {
   onSubmit: (username: string, password: string) => void;
-  authFailure: AuthFailure;
-  clearAuthFailure: () => AuthAction;
+  authFailure: ServerError;
+  clearFailedAuthError: () => ErrorsAction;
 }): JSX.Element => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<ValidationError>({});
 
   useEffect(() => {
-    clearAuthFailure();
-  }, [clearAuthFailure]);
+    clearFailedAuthError();
+  }, [clearFailedAuthError]);
 
   const validateSubmission = (): ValidationError => {
     let errors: ValidationError = {};
@@ -99,7 +99,7 @@ const AuthForm = ({
 };
 
 const mapStateToProps = (state: RootState) => {
-  return { authFailure: state.auth.authFailure };
+  return { authFailure: state.errors.auth };
 };
 
-export default connect(mapStateToProps, { clearAuthFailure })(AuthForm);
+export default connect(mapStateToProps, { clearFailedAuthError })(AuthForm);

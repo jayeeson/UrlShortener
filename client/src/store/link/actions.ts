@@ -15,16 +15,20 @@ export const getLinks = () => async (dispatch: Dispatch<LinkAction>): Promise<vo
 export const addLink = (longLink: string) => async (
   dispatch: Dispatch<LinkAction>
 ): Promise<void> => {
-  const { data }: { data: string } = await loadBalancer.post('/new', {
-    url: longLink,
-  });
+  try {
+    const { data }: { data: string } = await loadBalancer.post('/new', {
+      url: longLink,
+    });
 
-  const newLink: CreatedLink = { short_link: data, long_link: longLink };
+    const newLink: CreatedLink = { short_link: data, long_link: longLink };
 
-  dispatch({
-    type: LinkActionTypes.ADD_LINK,
-    payload: newLink,
-  });
+    dispatch({
+      type: LinkActionTypes.ADD_LINK,
+      payload: newLink,
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 export const deleteLink = (shortLink: string) => async (

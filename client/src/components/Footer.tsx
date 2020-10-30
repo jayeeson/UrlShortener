@@ -1,10 +1,9 @@
 import React from 'react';
-import './css/Footer.css';
 
 const Footer = (): JSX.Element => {
   if (window.location.pathname === '/' || window.location.pathname === '/pagenotfound') {
     return (
-      <div className="footer">
+      <div>
         <br />
         <br />
         Photo by <a href="https://freeimages.com/photographer/brainloc-32259">
