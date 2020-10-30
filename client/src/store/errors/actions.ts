@@ -1,4 +1,6 @@
-import { ErrorsAction, ErrorsActionTypes } from './types';
+import { Action } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import { ErrorsAction, ErrorsActionTypes, ErrorsState } from './types';
 
 export const setFailedAuthError = (message: string): ErrorsAction => {
   return {
@@ -13,11 +15,17 @@ export const clearFailedAuthError = (): ErrorsAction => {
   };
 };
 
-export const setServerError = (message: string): ErrorsAction => {
-  return {
+export const setServerError = (message: string) => async (
+  dispatch: ThunkDispatch<ErrorsState, void, Action>
+): Promise<void> => {
+  setTimeout(() => {
+    dispatch(clearServerError());
+  }, 10000);
+
+  dispatch({
     type: ErrorsActionTypes.SERVER_ERROR,
     payload: message,
-  };
+  });
 };
 
 export const clearServerError = (): ErrorsAction => {

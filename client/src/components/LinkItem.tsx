@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { CreatedLink } from '../types';
@@ -19,9 +18,6 @@ const LinkItem = ({ link, onDeleteLink, lastCopied, setLastCopied }: IProps): JS
 
   const onDeleteClick = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
-    const { data } = await axios.delete(`/link/${link.short_link}`);
-    console.log(data);
-
     onDeleteLink(link);
   };
 

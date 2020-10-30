@@ -2,19 +2,18 @@ import React from 'react';
 import axios from 'axios';
 
 import { CreatedLink } from '../types';
+import { getLinks } from '../store/link/actions';
 import CreateLink from './CreateLink';
 import LinkList from './LinkList';
+import { connect } from 'react-redux';
 
-class LinkShortener extends React.Component {
+interface IProps {
+  getLinks: () => Promise<void>;
+}
+
+class LinkShortener extends React.Component<IProps> {
   componentDidMount = async (): Promise<void> => {
-    const { data } = await axios.get('/userlinks');
-    console.log(data);
-
-    this.setState({ links: data });
-  };
-
-  setLinks = (links: CreatedLink[]): void => {
-    this.setState({ links });
+    this.props.getLinks();
   };
 
   render(): JSX.Element {
@@ -27,4 +26,4 @@ class LinkShortener extends React.Component {
   }
 }
 
-export default LinkShortener;
+export default connect(null, { getLinks })(LinkShortener);

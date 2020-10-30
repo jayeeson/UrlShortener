@@ -81,20 +81,22 @@ const AuthForm = ({
   };
 
   return (
-    <form className="ui form error" onSubmit={onFormSubmit}>
+    <>
       {renderSubmissionError()}
-      <div className="field">
-        <label>Username</label>
-        <input type="text" onChange={e => onChange(e, setUsername)} value={username} />
-        {renderValidationError('username')}
-      </div>
-      <div className="field">
-        <label>Password</label>
-        <input type="password" onChange={e => onChange(e, setPassword)} value={password} />
-        {renderValidationError('password')}
-      </div>
-      <button className="ui submit button">Submit</button>
-    </form>
+      <form className="ui form error" onSubmit={onFormSubmit}>
+        <div className="field">
+          <label>Username</label>
+          <input type="text" onChange={e => onChange(e, setUsername)} value={username} />
+          {renderValidationError('username')}
+        </div>
+        <div className="field">
+          <label>Password</label>
+          <input type="password" onChange={e => onChange(e, setPassword)} value={password} />
+          {renderValidationError('password')}
+        </div>
+        <button className="ui submit button">Submit</button>
+      </form>
+    </>
   );
 };
 

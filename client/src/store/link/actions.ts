@@ -1,19 +1,27 @@
-import { Dispatch } from 'react';
+import { Action } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import loadBalancer from '../../apis/loadBalancer';
 import { CreatedLink } from '../../types';
-import { LinkAction, LinkActionTypes } from './types';
+import { setServerError } from '../errors/actions';
+import { LinkActionTypes, LinkState } from './types';
 
-export const getLinks = () => async (dispatch: Dispatch<LinkAction>): Promise<void> => {
-  const { data }: { data: CreatedLink[] } = await loadBalancer.get('/userlinks');
+export const getLinks = () => async (
+  dispatch: ThunkDispatch<LinkState, void, Action>
+): Promise<void> => {
+  try {
+    const { data }: { data: CreatedLink[] } = await loadBalancer.get('/userlinks');
 
-  dispatch({
-    type: LinkActionTypes.GET_LINKS,
-    payload: data,
-  });
+    dispatch({
+      type: LinkActionTypes.GET_LINKS,
+      payload: data,
+    });
+  } catch {
+    dispatch(setServerError('Server error retrieving list of created links'));
+  }
 };
 
 export const addLink = (longLink: string) => async (
-  dispatch: Dispatch<LinkAction>
+  dispatch: ThunkDispatch<LinkState, void, Action<LinkActionTypes>>
 ): Promise<void> => {
   try {
     const { data }: { data: string } = await loadBalancer.post('/new', {
@@ -27,17 +35,21 @@ export const addLink = (longLink: string) => async (
       payload: newLink,
     });
   } catch (err) {
-    console.log(err);
+    dispatch(setServerError('Server error: Could not create new shortlink'));
   }
 };
 
 export const deleteLink = (shortLink: string) => async (
-  dispatch: Dispatch<LinkAction>
+  dispatch: ThunkDispatch<LinkState, void, Action>
 ): Promise<void> => {
-  await loadBalancer.delete(`/link/${shortLink}`);
+  try {
+    await loadBalancer.delete(`/link/${shortLink}`);
 
-  dispatch({
-    type: LinkActionTypes.DELETE_LINK,
-    payload: shortLink,
-  });
+    dispatch({
+      type: LinkActionTypes.DELETE_LINK,
+      payload: shortLink,
+    });
+  } catch {
+    setServerError('Server error deleting shortlink');
+  }
 };
