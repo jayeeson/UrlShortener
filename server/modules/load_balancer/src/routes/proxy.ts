@@ -12,7 +12,7 @@ const index = {
 const handleProxy = async (req: Request, res: Response, urls: ServiceUrls, service: keyof typeof index) => {
   if (serviceUrls[service].length === 0) {
     console.log(`server error: no service of type ${service} is running to handle request to ${req.url}`);
-    return res.status(400).send(`server error: no service of type ${service} is running to handle your request`);
+    return res.status(400).send('server error');
   }
 
   if (index[service] + 1 > serviceUrls[service].length) {

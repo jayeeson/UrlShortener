@@ -28,10 +28,10 @@ export async function getUserAuthenticatorPublicKey(): Promise<string | undefine
     const services = Object.values(data.services);
     if (services.length) {
       if (data) {
-        const authHost = services[0].url;
-        const response = await axios.get(`${authHost}/jwt/key`);
-        process.env.USER_AUTH_JWT_KEY = response.data;
-        return response.data;
+        const userAuthenticatorUrl = services[0].url;
+        const key = await axios.get(`${userAuthenticatorUrl}/jwt/key`);
+        process.env.USER_AUTH_JWT_KEY = key.data;
+        return key.data;
       }
     }
     return undefined;
